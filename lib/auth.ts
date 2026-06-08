@@ -30,8 +30,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   try {
     const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
-    
-    // Jika token expired atau invalid, hapus token dan redirect ke login
     if (res.status === 401) {
       removeToken();
       if (typeof window !== 'undefined') {
