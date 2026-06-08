@@ -2,13 +2,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Smartphone, KeyRound, ArrowLeft } from 'lucide-react';
-import { API_URL, setToken, apiFetch } from '@/lib/auth';
+import { API_URL, setToken } from '@/lib/auth';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [method, setMethod] = useState<'password' | 'otp'>('password');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +29,9 @@ export default function LoginPage() {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Login gagal');
+        
         setToken(data.token);
+        window.location.href = '/dashboard'; // Hard redirect agar cookie terbaca
       } else {
         if (!otpSent) {
           const res = await fetch(`${API_URL}/api/auth/request-otp`, {
@@ -43,7 +43,7 @@ export default function LoginPage() {
           if (!data.success) throw new Error(data.error || 'Gagal kirim OTP');
           setOtpSent(true);
           setIsLoading(false);
-          return; // Stop here, wait for user to input OTP
+          return; 
         } else {
           const res = await fetch(`${API_URL}/api/auth/verify-otp`, {
             method: 'POST',
@@ -51,13 +51,13 @@ export default function LoginPage() {
           });
           const data = await res.json();
           if (!data.success) throw new Error(data.error || 'OTP salah');
+          
           setToken(data.token);
+          window.location.href = '/dashboard'; // Hard redirect agar cookie terbaca
         }
       }
-      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -77,7 +77,6 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-background border border-border rounded-2xl p-6 shadow-xl">
-          {/* Tab Switcher */}
           <div className="flex p-1 bg-accent rounded-xl mb-6">
             <button
               onClick={() => { setMethod('password'); setOtpSent(false); setError(''); }}
@@ -96,14 +95,14 @@ export default function LoginPage() {
               <Smartphone className="w-4 h-4" /> OTP
             </button>
           </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
+
+          <form onSubmit={handleLogin} className="space-y-4">            <div>
               <label className="block text-sm font-medium text-foreground/80 mb-1.5">Nomor WhatsApp</label>
               <input
                 type="text"
                 placeholder="Contoh: 628123456789"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                 className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 required
               />
@@ -128,9 +127,9 @@ export default function LoginPage() {
                 <label className="block text-sm font-medium text-foreground/80 mb-1.5">Kode OTP</label>
                 <input
                   type="text"
-                  placeholder="6 digit kode dari WhatsApp"
+                  placeholder="6 digit kode"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                   maxLength={6}
                   className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all tracking-widest text-center text-lg font-bold"
                   required
@@ -142,7 +141,7 @@ export default function LoginPage() {
             )}
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm text-center">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm text-center font-medium">
                 {error.replace(/_/g, ' ').toUpperCase()}
               </div>
             )}
