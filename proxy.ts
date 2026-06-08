@@ -3,18 +3,15 @@ import type { NextRequest } from 'next/server';
 
 const PROTECTED_ROUTES = ['/dashboard'];
 const AUTH_ROUTES = ['/login'];
-
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('asuma_token')?.value;
   const { pathname } = request.nextUrl;
 
   const isProtected = PROTECTED_ROUTES.some(r => pathname.startsWith(r));
   const isAuthRoute = AUTH_ROUTES.some(r => pathname.startsWith(r));
-
   if (isProtected && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
-
   if (isAuthRoute && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
@@ -23,5 +20,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login'],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)',
+  ],
 };
