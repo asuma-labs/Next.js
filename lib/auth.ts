@@ -1,10 +1,9 @@
-// lib/auth.ts
 'use client';
 
 import Cookies from 'js-cookie';
-import { API_URL } from './config'; 
+import { API_URL } from './config';
 
-export { API_URL }; 
+export { API_URL };
 
 const TOKEN_NAME = 'asuma_token';
 
