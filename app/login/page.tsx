@@ -1,12 +1,13 @@
-// app/login/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Smartphone, KeyRound, ArrowLeft } from 'lucide-react';
-import { API_URL, setToken } from '@/lib/auth';
+import { API_URL, getToken, setToken } from '@/lib/auth';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [method, setMethod] = useState<'password' | 'otp'>('password');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -14,6 +15,24 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    const token = getToken();
+    if (token) {
+      router.replace('/dashboard');
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,10 +47,9 @@ export default function LoginPage() {
           body: JSON.stringify({ phone, password }),
         });
         const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Login gagal');
-        
+        if (!data.success) throw new Error(data.error || 'Login gagal');        
         setToken(data.token);
-        window.location.href = '/dashboard'; // Hard redirect agar cookie terbaca
+        window.location.href = '/dashboard';
       } else {
         if (!otpSent) {
           const res = await fetch(`${API_URL}/api/auth/request-otp`, {
@@ -47,13 +65,14 @@ export default function LoginPage() {
         } else {
           const res = await fetch(`${API_URL}/api/auth/verify-otp`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },            body: JSON.stringify({ phone, otp }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, otp }),
           });
           const data = await res.json();
           if (!data.success) throw new Error(data.error || 'OTP salah');
           
           setToken(data.token);
-          window.location.href = '/dashboard'; // Hard redirect agar cookie terbaca
+          window.location.href = '/dashboard';
         }
       }
     } catch (err: any) {
@@ -77,8 +96,7 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-background border border-border rounded-2xl p-6 shadow-xl">
-          <div className="flex p-1 bg-accent rounded-xl mb-6">
-            <button
+          <div className="flex p-1 bg-accent rounded-xl mb-6">            <button
               onClick={() => { setMethod('password'); setOtpSent(false); setError(''); }}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${
                 method === 'password' ? 'bg-background text-foreground shadow-sm' : 'text-foreground/60'
@@ -96,7 +114,8 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">            <div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
               <label className="block text-sm font-medium text-foreground/80 mb-1.5">Nomor WhatsApp</label>
               <input
                 type="text"
@@ -126,8 +145,7 @@ export default function LoginPage() {
               <div>
                 <label className="block text-sm font-medium text-foreground/80 mb-1.5">Kode OTP</label>
                 <input
-                  type="text"
-                  placeholder="6 digit kode"
+                  type="text"                  placeholder="6 digit kode"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                   maxLength={6}
@@ -145,6 +163,7 @@ export default function LoginPage() {
                 {error.replace(/_/g, ' ').toUpperCase()}
               </div>
             )}
+
             <button
               type="submit"
               disabled={isLoading}
