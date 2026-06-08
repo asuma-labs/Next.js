@@ -2,11 +2,11 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Crown, Coins, Zap, Sword, ShieldAlert, ArrowLeft, Eye, Users, UserPlus } from 'lucide-react';
-import { API_URL } from '@/lib/auth';
+import { API_URL } from '@/lib/config'; 
 import Link from 'next/link';
 
 const DEFAULT_AVATAR_URL = 'https://asuma.my.id/icons/default-profile.jpg';
-const DEFAULT_BANNER_URL = 'https://asuma.my.id/icons/default-banner.jpg'; // ✨ BARU
+const DEFAULT_BANNER_URL = 'https://asuma.my.id/icons/default-banner.jpg';
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
   const { username } = await params;
@@ -101,7 +101,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
           <ArrowLeft className="w-4 h-4" /> Kembali ke Home
         </Link>
 
-        {/* ✨ BARU: Banner + Profile Header */}
+        {/* Banner + Profile Header */}
         <div className="relative overflow-hidden rounded-3xl border border-border bg-background/50 backdrop-blur-md">
           {/* Banner */}
           <div className="relative h-48 md:h-56 overflow-hidden">
@@ -140,7 +140,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                   {profile.bio || 'Player Asuma MD'}
                 </p>
 
-                {/* ✨ BARU: Social Stats */}
+                {/* Social Stats */}
                 <div className="flex items-center justify-center md:justify-start gap-6 mt-4 text-sm">
                   <span className="flex items-center gap-1.5 text-foreground/60">
                     <Users className="w-4 h-4" /> 
