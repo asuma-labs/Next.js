@@ -1,4 +1,6 @@
 // lib/auth.ts
+'use client';
+
 import Cookies from 'js-cookie';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bot.asuma.my.id';
@@ -26,7 +28,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   try {
     const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
-    
     if (res.status === 401) {
       removeToken();
       if (typeof window !== 'undefined') {
