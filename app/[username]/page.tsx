@@ -2,52 +2,75 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Crown, Coins, Zap, Sword, ShieldAlert, ArrowLeft, Eye, Users, UserPlus } from 'lucide-react';
-import { API_URL } from '@/lib/config'; 
+import { API_URL, SITE_URL } from '@/lib/config';
 import Link from 'next/link';
 
-const DEFAULT_AVATAR_URL = 'https://asuma.my.id/icons/default-profile.jpg';
-const DEFAULT_BANNER_URL = 'https://asuma.my.id/icons/default-banner.jpg';
+const DEFAULT_AVATAR_URL = `${SITE_URL}/icons/default-profile.jpg`;
+const DEFAULT_BANNER_URL = `${SITE_URL}/icons/default-banner.jpg`;
+
+// Helper function untuk safe JSON parse
+async function safeFetchJSON(url: string) {
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    
+    // Check if response is OK
+    if (!res.ok) {
+      console.error(`Fetch failed: ${res.status} ${res.statusText}`);
+      return null;
+    }
+    
+    // Get content type
+    const contentType = res.headers.get('content-type');
+    
+    // If not JSON, return null
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error(`Expected JSON but got: ${contentType}`);
+      console.error(`URL: ${url}`);
+      return null;
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('Fetch error:', error);
+    return null;
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
   const { username } = await params;
   
-  try {
-    const res = await fetch(`${API_URL}/api/profile/${username}`, { cache: 'no-store' });
-    const data = await res.json();
+  const data = await safeFetchJSON(`${API_URL}/api/profile/${username}`);
 
-    if (data.success) {
-      const user = data.data.profile;
-      const eco = data.data.economy;
-      const social = data.data.social;
-      
-      const imageUrl = user.profilePic ? `https://asuma.my.id/${user.profilePic}` : DEFAULT_AVATAR_URL;
-
-      return {
-        title: `${user.name} (@${username}) | Asuma Bot Profile`,
-        description: user.bio || `Player Asuma MD | Level ${eco.level} | ${social.followers} Followers`,
-        openGraph: {
-          title: `${user.name} | Asuma Bot`,
-          description: user.bio || `Player Asuma Bot - Level ${eco.level}`,
-          url: `https://asuma.my.id/${username}`,
-          type: 'profile',
-          images: [
-            {
-              url: imageUrl,
-              width: 512,
-              height: 512,
-              alt: `${user.name} Profile Picture`,
-            },
-          ],
-        },
-        twitter: {
-          card: 'summary_large_image',
-          title: `${user.name} | Asuma Bot`,
-          description: user.bio || `Player Asuma Bot - Level ${eco.level}`,
-          images: [imageUrl],
-        },
-      };
-    }
-  } catch (error) {    console.error('Failed to fetch metadata:', error);
+  if (data?.success) {
+    const user = data.data.profile;
+    const eco = data.data.economy;
+    const social = data.data.social;
+    
+    const imageUrl = user.profilePic ? `${SITE_URL}/${user.profilePic}` : DEFAULT_AVATAR_URL;
+    return {
+      title: `${user.name} (@${username}) | Asuma Bot Profile`,
+      description: user.bio || `Player Asuma MD | Level ${eco.level} | ${social.followers} Followers`,
+      openGraph: {
+        title: `${user.name} | Asuma Bot`,
+        description: user.bio || `Player Asuma Bot - Level ${eco.level}`,
+        url: `${SITE_URL}/${username}`,
+        type: 'profile',
+        images: [
+          {
+            url: imageUrl,
+            width: 512,
+            height: 512,
+            alt: `${user.name} Profile Picture`,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${user.name} | Asuma Bot`,
+        description: user.bio || `Player Asuma Bot - Level ${eco.level}`,
+        images: [imageUrl],
+      },
+    };
   }
 
   return {
@@ -59,13 +82,9 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
 
-  const res = await fetch(`${API_URL}/api/profile/${username}`, { 
-    cache: 'no-store' 
-  });
-  
-  const data = await res.json();
+  const data = await safeFetchJSON(`${API_URL}/api/profile/${username}`);
 
-  if (!data.success) {
+  if (!data?.success) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center bg-background">
         <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center mb-6">
@@ -77,8 +96,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         </p>
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-        >
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"        >
           <ArrowLeft className="w-4 h-4" /> Kembali ke Home
         </Link>
       </div>
@@ -88,15 +106,16 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const { profile, economy, games, social } = data.data;
   const formatNumber = (num: number) => new Intl.NumberFormat('id-ID').format(num);
   
-  const avatarUrl = profile.profilePic ? `https://asuma.my.id/${profile.profilePic}` : '/icons/default-profile.jpg';
-  const bannerUrl = profile.banner ? `https://asuma.my.id/${profile.banner}` : '/icons/default-banner.jpg';
+  const avatarUrl = profile.profilePic ? `${SITE_URL}/${profile.profilePic}` : `${SITE_URL}/icons/default-profile.jpg`;
+  const bannerUrl = profile.banner ? `${SITE_URL}/${profile.banner}` : `${SITE_URL}/icons/default-banner.jpg`;
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-12 px-4">
       <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         
         <Link 
-          href="/"           className="inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-foreground transition-colors mb-2"
+          href="/" 
+          className="inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-foreground transition-colors mb-2"
         >
           <ArrowLeft className="w-4 h-4" /> Kembali ke Home
         </Link>
@@ -126,8 +145,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
               </div>
 
               {/* Info */}
-              <div className="flex-1 text-center md:text-left md:pb-2">
-                <div className="flex flex-col md:flex-row items-center gap-3 mb-2">
+              <div className="flex-1 text-center md:text-left md:pb-2">                <div className="flex flex-col md:flex-row items-center gap-3 mb-2">
                   <h1 className="text-3xl font-bold text-foreground">{profile.name}</h1>
                   {profile.vip && (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-600 dark:text-yellow-400 text-xs font-bold border border-yellow-500/20">
@@ -145,7 +163,8 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                   <span className="flex items-center gap-1.5 text-foreground/60">
                     <Users className="w-4 h-4" /> 
                     <span className="font-semibold text-foreground">{social.followers}</span> Followers
-                  </span>                  <span className="flex items-center gap-1.5 text-foreground/60">
+                  </span>
+                  <span className="flex items-center gap-1.5 text-foreground/60">
                     <UserPlus className="w-4 h-4" /> 
                     <span className="font-semibold text-foreground">{social.following}</span> Following
                   </span>
@@ -175,8 +194,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
                 <Zap className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-medium text-foreground/60">Sisa Limit</span>
+              </div>              <span className="text-sm font-medium text-foreground/60">Sisa Limit</span>
             </div>
             <p className="text-2xl font-bold text-foreground">{formatNumber(economy.limit)}</p>
           </div>
@@ -194,7 +212,8 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
         {/* Game Stats */}
         <div className="p-6 rounded-2xl border border-border bg-background/50 backdrop-blur-sm">
-          <h3 className="text-sm font-semibold text-foreground/80 uppercase tracking-wider mb-4">Statistik Permainan</h3>          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <h3 className="text-sm font-semibold text-foreground/80 uppercase tracking-wider mb-4">Statistik Permainan</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="text-center p-4 rounded-xl bg-accent/50 border border-border/50">
               <p className="text-2xl font-bold text-foreground">{games.dungeonWins}</p>
               <p className="text-xs text-foreground/60 mt-1">Dungeon Clears</p>
