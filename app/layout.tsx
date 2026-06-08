@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -18,44 +17,58 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Asuma - Premium WhatsApp Bot Service",
   description: "WhatsApp automation solution with assistant bot, social media downloader, and cloning features",
-  keywords: ['whatsapp bot', 'automation', 'downloader', 'jadibot'],
-  authors: [{ name: 'Aditia Nugraha Putra' }],
-  creator: 'Aditia Nugraha Putra',
-  publisher: 'Ditss Store',
+  keywords: ["whatsapp bot", "automation", "downloader", "jadibot", "asuma bot", "ditss store"],
+  authors: [{ name: "ditss" }],
+  creator: "ditss",
+  publisher: "ditss",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://asuma.my.id'),
+  metadataBase: new URL("https://asuma.my.id"),
   alternates: {
-    canonical: '/',
+    canonical: "/",
   },
   icons: {
-    icon: '/icons/favicon.ico',
-    shortcut: '/icons/favicon-16x16.png',
-    apple: '/icons/apple-touch-icon.png',
+    icon: "/icons/favicon.ico",
+    shortcut: "/icons/favicon-16x16.png",
+    apple: "/icons/apple-touch-icon.png",
   },
   openGraph: {
-    type: 'website',
-    locale: 'id_ID',
-    url: 'https://asuma.my.id',
-    title: 'Asuma - Premium WhatsApp Bot Service',
-    description: 'WhatsApp automation solution with assistant bot, social media downloader, and cloning features',
-    siteName: 'Asuma Bot',
+    type: "website",
+    locale: "id_ID",
+    url: "https://asuma.my.id",
+    title: "Asuma - Premium WhatsApp Bot Service",
+    description: "WhatsApp automation solution with assistant bot, social media downloader, and cloning features",
+    siteName: "Asuma Bot",
     images: [
       {
-        url: 'https://asuma.my.id/icons/android-chrome-512x512.png',
+        url: "https://asuma.my.id/icons/android-chrome-512x512.png",
         width: 512,
         height: 512,
-        alt: 'Asuma Logo',
+        alt: "Asuma Logo",
+          },
+        ],
       },
-    ],
-  },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Asuma - Premium WhatsApp Bot Service',
-    description: 'WhatsApp automation solution with assistant bot, social media downloader, and cloning features',
+    card: "summary_large_image",
+    title: "Asuma - Premium WhatsApp Bot Service",
+    description: "WhatsApp automation solution with assistant bot, social media downloader, and cloning features",
+  },
+  verification: {
+    google: "GANTI_DENGAN_KODE_VERIFIKASI_GOOGLE_KAMU",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -66,7 +79,8 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
