@@ -2,8 +2,10 @@
 'use client';
 
 import Cookies from 'js-cookie';
+import { API_URL } from './config'; 
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bot.asuma.my.id';
+export { API_URL }; 
+
 const TOKEN_NAME = 'asuma_token';
 
 export function getToken(): string | null {
@@ -28,6 +30,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   try {
     const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
+    
     if (res.status === 401) {
       removeToken();
       if (typeof window !== 'undefined') {
