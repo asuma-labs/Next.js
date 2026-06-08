@@ -1,23 +1,19 @@
 // lib/auth.ts
+import Cookies from 'js-cookie';
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bot.asuma.my.id';
+const TOKEN_NAME = 'asuma_token';
 
 export function getToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('asuma_token');
-  }
-  return null;
+  return Cookies.get(TOKEN_NAME) || null;
 }
 
 export function setToken(token: string) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('asuma_token', token);
-  }
+  Cookies.set(TOKEN_NAME, token, { expires: 7, path: '/' });
 }
 
 export function removeToken() {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('asuma_token');
-  }
+  Cookies.remove(TOKEN_NAME, { path: '/' });
 }
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
@@ -30,6 +26,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   try {
     const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
+    
     if (res.status === 401) {
       removeToken();
       if (typeof window !== 'undefined') {
