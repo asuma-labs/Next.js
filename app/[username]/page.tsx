@@ -2,36 +2,31 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Crown, Coins, Zap, Sword, ShieldAlert, ArrowLeft, Eye, Users, UserPlus } from 'lucide-react';
-import { API_URL, SITE_URL } from '@/lib/config';
+import { SITE_URL } from '@/lib/config'; // ✨ Hanya butuh SITE_URL, gak perlu API_URL
 import Link from 'next/link';
 
 const DEFAULT_AVATAR_URL = `${SITE_URL}/icons/default-profile.jpg`;
 const DEFAULT_BANNER_URL = `${SITE_URL}/icons/default-banner.jpg`;
 
-// Helper function untuk safe JSON parse
-async function safeFetchJSON(url: string) {
+// Helper function untuk fetch dari API Route lokal
+async function getProfileData(username: string) {
+  const url = `${SITE_URL}/api/profile/${username}`; // ✨ Fetch ke API Route lokal
+  console.log('🔍 Page: Fetching from', url);
+  
   try {
     const res = await fetch(url, { cache: 'no-store' });
     
-    // Check if response is OK
     if (!res.ok) {
-      console.error(`Fetch failed: ${res.status} ${res.statusText}`);
+      console.error('❌ Page: Fetch failed:', res.status, res.statusText);
       return null;
     }
     
-    // Get content type
-    const contentType = res.headers.get('content-type');
+    const data = await res.json();
+    console.log('✅ Page: Data received:', data?.success ? 'success' : 'failed');
     
-    // If not JSON, return null
-    if (!contentType || !contentType.includes('application/json')) {
-      console.error(`Expected JSON but got: ${contentType}`);
-      console.error(`URL: ${url}`);
-      return null;
-    }
-    
-    return await res.json();
+    return data;
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.error('❌ Page: Fetch error:', error);
     return null;
   }
 }
@@ -39,20 +34,20 @@ async function safeFetchJSON(url: string) {
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
   const { username } = await params;
   
-  const data = await safeFetchJSON(`${API_URL}/api/profile/${username}`);
+  const data = await getProfileData(username);
 
   if (data?.success) {
     const user = data.data.profile;
     const eco = data.data.economy;
-    const social = data.data.social;
+    const social = data.data.social || { followers: 0, following: 0 }; // Fallback kalau backend belum update
     
     const imageUrl = user.profilePic ? `${SITE_URL}/${user.profilePic}` : DEFAULT_AVATAR_URL;
+
     return {
       title: `${user.name} (@${username}) | Asuma Bot Profile`,
       description: user.bio || `Player Asuma MD | Level ${eco.level} | ${social.followers} Followers`,
       openGraph: {
-        title: `${user.name} | Asuma Bot`,
-        description: user.bio || `Player Asuma Bot - Level ${eco.level}`,
+        title: `${user.name} | Asuma Bot`,        description: user.bio || `Player Asuma Bot - Level ${eco.level}`,
         url: `${SITE_URL}/${username}`,
         type: 'profile',
         images: [
@@ -82,7 +77,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
 
-  const data = await safeFetchJSON(`${API_URL}/api/profile/${username}`);
+  const data = await getProfileData(username);
 
   if (!data?.success) {
     return (
@@ -94,9 +89,15 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         <p className="text-foreground/60 mb-8 max-w-md">
           Username <span className="font-mono bg-accent px-2 py-0.5 rounded text-foreground/80">{username}</span> tidak terdaftar di database Asuma.
         </p>
+        {data?.error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
+            <p className="font-semibold">Error Details:</p>
+            <p className="text-xs mt-1">{data.error}: {data.details || data.message || 'Unknown'}</p>
+          </div>
+        )}
         <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"        >
+          href="/"           className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+        >
           <ArrowLeft className="w-4 h-4" /> Kembali ke Home
         </Link>
       </div>
@@ -108,6 +109,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   
   const avatarUrl = profile.profilePic ? `${SITE_URL}/${profile.profilePic}` : `${SITE_URL}/icons/default-profile.jpg`;
   const bannerUrl = profile.banner ? `${SITE_URL}/${profile.banner}` : `${SITE_URL}/icons/default-banner.jpg`;
+  
+  // Fallback kalau backend belum return social data
+  const socialData = social || { followers: 0, following: 0 };
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-12 px-4">
@@ -141,11 +145,11 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                   src={avatarUrl} 
                   alt={profile.name} 
                   className="w-full h-full object-cover"
-                />
-              </div>
+                />              </div>
 
               {/* Info */}
-              <div className="flex-1 text-center md:text-left md:pb-2">                <div className="flex flex-col md:flex-row items-center gap-3 mb-2">
+              <div className="flex-1 text-center md:text-left md:pb-2">
+                <div className="flex flex-col md:flex-row items-center gap-3 mb-2">
                   <h1 className="text-3xl font-bold text-foreground">{profile.name}</h1>
                   {profile.vip && (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-600 dark:text-yellow-400 text-xs font-bold border border-yellow-500/20">
@@ -162,15 +166,15 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                 <div className="flex items-center justify-center md:justify-start gap-6 mt-4 text-sm">
                   <span className="flex items-center gap-1.5 text-foreground/60">
                     <Users className="w-4 h-4" /> 
-                    <span className="font-semibold text-foreground">{social.followers}</span> Followers
+                    <span className="font-semibold text-foreground">{socialData.followers}</span> Followers
                   </span>
                   <span className="flex items-center gap-1.5 text-foreground/60">
                     <UserPlus className="w-4 h-4" /> 
-                    <span className="font-semibold text-foreground">{social.following}</span> Following
+                    <span className="font-semibold text-foreground">{socialData.following}</span> Following
                   </span>
                   <span className="flex items-center gap-1.5 text-foreground/60">
                     <Eye className="w-4 h-4" /> 
-                    <span className="font-semibold text-foreground">{formatNumber(profile.profileViews)}</span> Views
+                    <span className="font-semibold text-foreground">{formatNumber(profile.profileViews || 0)}</span> Views
                   </span>
                 </div>
               </div>
@@ -190,11 +194,11 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
             <p className="text-2xl font-bold text-foreground">Rp {formatNumber(economy.money)}</p>
           </div>
 
-          <div className="p-6 rounded-2xl border border-border bg-background/50 backdrop-blur-sm hover:border-blue-500/30 transition-all duration-300 group">
-            <div className="flex items-center gap-3 mb-3">
+          <div className="p-6 rounded-2xl border border-border bg-background/50 backdrop-blur-sm hover:border-blue-500/30 transition-all duration-300 group">            <div className="flex items-center gap-3 mb-3">
               <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
                 <Zap className="w-5 h-5" />
-              </div>              <span className="text-sm font-medium text-foreground/60">Sisa Limit</span>
+              </div>
+              <span className="text-sm font-medium text-foreground/60">Sisa Limit</span>
             </div>
             <p className="text-2xl font-bold text-foreground">{formatNumber(economy.limit)}</p>
           </div>
