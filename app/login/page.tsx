@@ -29,6 +29,10 @@ export default function LoginPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone, password }),
         });
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Server returned unexpected response (Status: ${res.status}). Please try again later.`);
+        }
         const data = await res.json();
         if (!data.success) throw new Error(data.error || data.message || 'Login failed');
         const token = data.token || (data.data && data.data.token);
@@ -41,6 +45,10 @@ export default function LoginPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone }),
           });
+          const contentType = res.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+              throw new Error(`Server returned unexpected response (Status: ${res.status}). Please try again later.`);
+          }
           const data = await res.json();
           if (!data.success) throw new Error(data.error || data.message || 'Failed to send OTP');
           setOtpSent(true);
@@ -52,6 +60,10 @@ export default function LoginPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone, otp }),
           });
+          const contentType = res.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+              throw new Error(`Server returned unexpected response (Status: ${res.status}). Please try again later.`);
+          }
           const data = await res.json();
           if (!data.success) throw new Error(data.error || data.message || 'Invalid OTP');
           const token = data.token || (data.data && data.data.token);
