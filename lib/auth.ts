@@ -28,8 +28,9 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   };
 
   try {
-    const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
-    
+    const targetUrl = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
+    const res = await fetch(targetUrl, { ...options, headers });
+
     if (res.status === 401) {
       removeToken();
       if (typeof window !== 'undefined') {
@@ -37,7 +38,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
       }
       throw new Error('Unauthorized');
     }
-    
+
     return await res.json();
   } catch (error) {
     console.error('API Fetch Error:', error);
