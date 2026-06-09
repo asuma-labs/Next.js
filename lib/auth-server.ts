@@ -5,7 +5,7 @@ export async function getServerViewerData() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('asuma_token')?.value;
-    
+
     if (!token) return null;
 
     const res = await fetch(`${API_URL}/api/dashboard/me`, {
