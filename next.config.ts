@@ -8,18 +8,31 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-  },
+images: {
+  remotePatterns: [
+    {
+      protocol: 'https',
+      hostname: 'picsum.photos',
+      port: '',
+      pathname: '/**',
+    },
+    // Opsi A: Jika cuma butuh 1 level subdomain (contoh: cdn.asuma.my.id)
+    {
+      protocol: 'https',
+      hostname: '*.asuma.my.id', 
+      port: '',
+      pathname: '/**',
+    },
+    {
+      protocol: 'https',
+      hostname: 'asuma.my.id', 
+      port: '',
+      pathname: '/**',
+    },
+  ],
+},
   output: 'standalone',
-  transpilePackages: ['motion'],
+  transpilePackages: ['motiaon'],
   webpack: (config, {dev}) => {
     if (dev && process.env.DISABLE_HMR === 'true') {
       config.watchOptions = {
