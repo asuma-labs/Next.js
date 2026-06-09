@@ -55,6 +55,9 @@ export const metadata: Metadata = {
     description: "Bot WhatsApp multifungsi dengan 100+ perintah. Gratis, cepat, dan selalu online.",
     images: ["/icons/android-chrome-512x512.png"],
   },
+  verification: {
+    google: "GANTI_DENGAN_KODE_VERIFIKASI_GOOGLE_KAMU",
+  },
   icons: {
     icon: [
       { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
