@@ -4,13 +4,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
 import {
   Bot, Users, Gamepad2, Download, Search, Zap,
-  ArrowRight, CheckCircle2, Code2, Shield, Star,
-  Wrench, Heart, MessageCircle, Github, BookOpen,
-  Mail, Home, ChevronRight, Sparkles, Activity,
+  ArrowRight, CheckCircle2, Code2, Shield,
+  Heart, MessageCircle, Github, BookOpen,
+  Mail, Home as HomeIcon, ChevronRight, Sparkles, Activity,
   UserCheck, Clock, TrendingUp
 } from 'lucide-react';
 
-// ─── Animated Counter ────────────────────────────────────────────────────────
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
@@ -37,7 +36,6 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
   return <span ref={ref}>{count}{suffix}</span>;
 }
 
-// ─── Feature Card ─────────────────────────────────────────────────────────────
 function FeatureCard({
   icon, title, description, delay, accent
 }: {
@@ -56,7 +54,6 @@ function FeatureCard({
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
       className="group relative p-7 rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm flex flex-col gap-4 overflow-hidden"
     >
-      {/* Glow on hover */}
       <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl ${accent}`} />
       <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center">
         {icon}
@@ -67,7 +64,6 @@ function FeatureCard({
   );
 }
 
-// ─── Why Card ─────────────────────────────────────────────────────────────────
 function WhyCard({
   icon, title, description, delay
 }: {
@@ -96,7 +92,6 @@ function WhyCard({
   );
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({
   icon, value, suffix, label, delay
 }: {
@@ -126,14 +121,12 @@ function StatCard({
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Home() {
   return (
     <div
       className="min-h-screen font-sans text-white overflow-x-hidden"
       style={{ background: 'linear-gradient(135deg, #060D1F 0%, #0A1628 50%, #0D1B2E 100%)' }}
     >
-      {/* Ambient orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="absolute top-1/3 -right-40 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl" />
@@ -142,10 +135,7 @@ export default function Home() {
 
       <main className="relative z-10 max-w-7xl mx-auto px-6">
 
-        {/* ── Hero ────────────────────────────────────────────────────────────── */}
         <section className="pt-24 md:pt-36 pb-20 flex flex-col items-center text-center">
-
-          {/* Badge */}
           <motion.div
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -156,7 +146,6 @@ export default function Home() {
             🤖 WhatsApp Bot · Fast · Smart · Powerful
           </motion.div>
 
-          {/* Bot avatar with pulse rings */}
           <motion.div
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -177,7 +166,6 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Title */}
           <motion.h1
             initial={{ y: 24, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -193,7 +181,6 @@ export default function Home() {
             </span>
           </motion.h1>
 
-          {/* Subtitle */}
           <motion.p
             initial={{ y: 24, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -204,7 +191,6 @@ export default function Home() {
             bermain game, mengunduh media, dan mengotomatisasi berbagai aktivitas langsung dari WhatsApp.
           </motion.p>
 
-          {/* CTA */}
           <motion.div
             initial={{ y: 24, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -223,7 +209,6 @@ export default function Home() {
             </a>
           </motion.div>
 
-          {/* Scroll hint */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -240,7 +225,6 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* ── Statistics ──────────────────────────────────────────────────────── */}
         <section className="py-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard icon={<Code2 className="w-6 h-6 text-cyan-400" />} value={100} suffix="+" label="Commands" delay={0} />
@@ -250,7 +234,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Features ────────────────────────────────────────────────────────── */}
         <section className="py-20 md:py-28">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -274,11 +257,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── About Developer ─────────────────────────────────────────────────── */}
         <section className="py-20 md:py-28 border-t border-white/[0.06]">
           <div className="flex flex-col md:flex-row gap-12 items-center">
-
-            {/* Avatar side */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -296,7 +276,6 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Text side */}
             <motion.div
               initial={{ opacity: 0, x: 24 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -352,7 +331,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Why Choose Asuma ────────────────────────────────────────────────── */}
         <section className="py-20 md:py-28 border-t border-white/[0.06]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -369,16 +347,15 @@ export default function Home() {
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <WhyCard delay={0}    icon={<Zap className="w-5 h-5 text-cyan-400" />}       title="Cepat & Stabil"          description="Respons instan dengan infrastruktur yang dioptimalkan untuk uptime tinggi sepanjang waktu." />
-            <WhyCard delay={0.07} icon={<Sparkles className="w-5 h-5 text-cyan-400" />}  title="Banyak Fitur"            description="Lebih dari 100 perintah tersedia — satu bot untuk semua kebutuhan kamu di WhatsApp." />
-            <WhyCard delay={0.14} icon={<Activity className="w-5 h-5 text-cyan-400" />}  title="Selalu Dikembangkan"     description="Update rutin setiap bulan menghadirkan fitur baru berdasarkan masukan pengguna langsung." />
-            <WhyCard delay={0.21} icon={<MessageCircle className="w-5 h-5 text-cyan-400" />} title="Mudah Digunakan"     description="Perintah sederhana, dokumentasi jelas, dan tidak perlu instalasi apapun dari pengguna." />
-            <WhyCard delay={0.28} icon={<Shield className="w-5 h-5 text-cyan-400" />}    title="Aman"                    description="Tidak menyimpan pesan pribadi. Privasi pengguna adalah prioritas dalam setiap fitur." />
-            <WhyCard delay={0.35} icon={<Heart className="w-5 h-5 text-cyan-400" />}     title="Gratis Digunakan"        description="Semua fitur inti tersedia gratis. Tidak ada paywall tersembunyi untuk fungsi utama." />
+            <WhyCard delay={0}    icon={<Zap className="w-5 h-5 text-cyan-400" />}            title="Cepat & Stabil"      description="Respons instan dengan infrastruktur yang dioptimalkan untuk uptime tinggi sepanjang waktu." />
+            <WhyCard delay={0.07} icon={<Sparkles className="w-5 h-5 text-cyan-400" />}       title="Banyak Fitur"        description="Lebih dari 100 perintah tersedia — satu bot untuk semua kebutuhan kamu di WhatsApp." />
+            <WhyCard delay={0.14} icon={<Activity className="w-5 h-5 text-cyan-400" />}       title="Selalu Dikembangkan" description="Update rutin setiap bulan menghadirkan fitur baru berdasarkan masukan pengguna langsung." />
+            <WhyCard delay={0.21} icon={<MessageCircle className="w-5 h-5 text-cyan-400" />}  title="Mudah Digunakan"     description="Perintah sederhana, dokumentasi jelas, dan tidak perlu instalasi apapun dari pengguna." />
+            <WhyCard delay={0.28} icon={<Shield className="w-5 h-5 text-cyan-400" />}         title="Aman"                description="Tidak menyimpan pesan pribadi. Privasi pengguna adalah prioritas dalam setiap fitur." />
+            <WhyCard delay={0.35} icon={<Heart className="w-5 h-5 text-cyan-400" />}          title="Gratis Digunakan"    description="Semua fitur inti tersedia gratis. Tidak ada paywall tersembunyi untuk fungsi utama." />
           </div>
         </section>
 
-        {/* ── CTA ─────────────────────────────────────────────────────────────── */}
         <section className="py-20 md:py-28 pb-32">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -387,12 +364,8 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="relative rounded-3xl overflow-hidden"
           >
-            {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/60 via-indigo-900/60 to-slate-900/80" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-cyan-500/20 via-transparent to-transparent" />
             <div className="absolute inset-0 border border-cyan-500/20 rounded-3xl" />
-
-            {/* Decorative bot icons */}
             <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl" />
             <div className="absolute -bottom-8 -left-8 w-48 h-48 rounded-full bg-cyan-500/10 blur-3xl" />
 
@@ -407,19 +380,22 @@ export default function Home() {
                 <Bot className="w-8 h-8 text-white" />
               </motion.div>
               <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight max-w-2xl">
-                Siap mencoba <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-indigo-300">Asuma Bot?</span>
+                Siap mencoba{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-indigo-300">
+                  Asuma Bot?
+                </span>
               </h2>
               <p className="mt-5 text-base md:text-lg text-slate-400 max-w-xl">
                 Gunakan Asuma sekarang dan nikmati pengalaman WhatsApp yang lebih cerdas, praktis, dan menyenangkan.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row gap-3">
-                <button className="h-13 px-9 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 text-white font-bold hover:from-cyan-400 hover:to-indigo-400 transition-all shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 group">
+                <button className="px-9 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 text-white font-bold hover:from-cyan-400 hover:to-indigo-400 transition-all shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2">
                   <Zap className="w-5 h-5" />
                   Mulai Sekarang
                 </button>
                 <a
                   href="/docs"
-                  className="h-13 px-9 py-3 rounded-full bg-white/[0.08] border border-white/[0.15] text-white font-semibold hover:bg-white/[0.14] transition-colors flex items-center justify-center gap-2"
+                  className="px-9 py-3.5 rounded-full bg-white/[0.08] border border-white/[0.15] text-white font-semibold hover:bg-white/[0.14] transition-colors flex items-center justify-center gap-2"
                 >
                   <BookOpen className="w-4 h-4" />
                   Pelajari Lebih Lanjut
@@ -431,11 +407,9 @@ export default function Home() {
 
       </main>
 
-      {/* ── Footer ──────────────────────────────────────────────────────────── */}
       <footer className="relative z-10 border-t border-white/[0.06] bg-slate-950/60 backdrop-blur-sm pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
-            {/* Brand */}
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
@@ -448,12 +422,11 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Navigation */}
             <div>
               <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Navigasi</h4>
               <ul className="space-y-3 text-sm text-slate-500">
                 {[
-                  { label: 'Home', href: '/', icon: Home },
+                  { label: 'Home', href: '/', icon: HomeIcon },
                   { label: 'About', href: '/about', icon: UserCheck },
                   { label: 'Documentation', href: '/docs', icon: BookOpen },
                 ].map(({ label, href, icon: Icon }) => (
@@ -466,7 +439,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Links */}
             <div>
               <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Tautan</h4>
               <ul className="space-y-3 text-sm text-slate-500">
@@ -475,7 +447,12 @@ export default function Home() {
                   { label: 'Contact', href: '/contact', icon: Mail },
                 ].map(({ label, href, icon: Icon }) => (
                   <li key={label}>
-                    <a href={href} className="flex items-center gap-2 hover:text-white transition-colors" target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+                    <a
+                      href={href}
+                      className="flex items-center gap-2 hover:text-white transition-colors"
+                      target={href.startsWith('http') ? '_blank' : undefined}
+                      rel="noreferrer"
+                    >
                       <Icon className="w-4 h-4" /> {label}
                     </a>
                   </li>
