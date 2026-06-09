@@ -28,6 +28,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   };
 
   try {
+    // Route through local /api/ proxy relative URL to avoid CORS and failed fetches inside client iframe
     const targetUrl = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
     const res = await fetch(targetUrl, { ...options, headers });
 
@@ -37,6 +38,11 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
         window.location.href = '/login';
       }
       throw new Error('Unauthorized');
+    }
+
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+       throw new Error(`Server returned unexpected response (Status: ${res.status}).`);
     }
 
     return await res.json();
