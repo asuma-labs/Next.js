@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     images: ["/icons/android-chrome-512x512.png"],
   },
   verification: {
-    google: "GANTI_DENGAN_KODE_VERIFIKASI_GOOGLE_KAMU",
+    google: "hMmtzBFUiEDI1-fsDioUzB0VgKiARhdFCaAwKIBmEJw",
   },
   icons: {
     icon: [
