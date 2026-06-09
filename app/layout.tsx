@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/theme-provider"; // Pastikan path ini benar
 import { Navigation } from "@/components/navigation";
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
 
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 export const metadata: Metadata = {
   metadataBase: new URL("https://asuma.my.id"),
   title: {
@@ -80,11 +89,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" suppressHydrationWarning className="h-full antialiased">
+    <html 
+      lang="id" 
+      suppressHydrationWarning 
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col bg-[#060D1F] text-white transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Navigation />
-          <main className="flex-grow flex flex-col">
+          {/* pt-16 opsional jika Navigasi kamu posisinya fixed/absolute di atas */}
+          <main className="flex-grow flex flex-col pt-16"> 
             {children}
           </main>
         </ThemeProvider>
@@ -92,7 +106,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
-
 
 /*import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
