@@ -1,4 +1,29 @@
 import type { Metadata } from "next";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Navigation } from "@/components/navigation";
+
+export const metadata: Metadata = {
+  title: "Asuma Bot - Premium WhatsApp Bot Service",
+  description: "WhatsApp automation solution with assistant bot, social media downloader, and cloning features",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="id" suppressHydrationWarning className="h-full antialiased">
+      <body className="min-h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-300">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Navigation />
+          <main className="flex-grow flex flex-col">
+            {children}
+          </main>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+
+/*import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -98,4 +123,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+}*/
