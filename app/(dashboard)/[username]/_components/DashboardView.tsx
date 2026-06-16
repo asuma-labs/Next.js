@@ -1,144 +1,72 @@
-// app/[username]/_components/DashboardView.tsx
-'use client';
+"use client";
 
-import { Crown, Download, Zap, Shield } from 'lucide-react';
-import { motion } from 'motion/react';
+import { User, Users, Trophy, Wallet, Gamepad2 } from "lucide-react";
 
-interface DashboardViewProps {
-  userData: {
-    profile: {
-      name: string;
-      vip: boolean;
-      ban: boolean;
-      age: number;
-      bio: string;
-      serialNumber: string;
-      referralCode: string;
-      hasPassword: boolean;
-    };
-    economy: {
-      limit: number;
-      money: number;
-      exp: number;
-      level: number;
-      bank: number;
-      dailyStreak: number;
-    };
-    tracking: any;
-  };
-}
-
-export default function DashboardView({ userData }: DashboardViewProps) {
-  const { profile, economy } = userData;
-
-  const stats = [
-    { 
-      label: 'Level', 
-      value: economy?.level || 1, 
-      icon: Crown, 
-      color: 'text-amber-500', 
-      bg: 'bg-amber-50 dark:bg-amber-500/10' 
-    },
-    { 
-      label: 'Money', 
-      value: `Rp ${(economy?.money || 0).toLocaleString('id-ID')}`, 
-      icon: Download, 
-      color: 'text-green-500', 
-      bg: 'bg-green-50 dark:bg-green-500/10' 
-    },
-    { 
-      label: 'Limit', 
-      value: economy?.limit || 0, 
-      icon: Zap, 
-      color: 'text-sky-500', 
-      bg: 'bg-sky-50 dark:bg-sky-500/10' 
-    },
-    { 
-      label: 'Status', 
-      value: profile?.vip ? 'VIP' : 'Regular', 
-      icon: Shield, 
-      color: profile?.vip ? 'text-purple-500' : 'text-zinc-500', 
-      bg: profile?.vip ? 'bg-purple-50 dark:bg-purple-500/10' : 'bg-zinc-100 dark:bg-zinc-800' 
-    },
-  ];
+export default function PublicProfileView({ userData }: { userData: any }) {
+  const { profile, economy, games, social } = userData;
 
   return (
-    <>
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-6"
-      >
-        <div>
-          <h1 className="text-3xl tracking-tight font-bold">Hello, {profile?.name || 'User'}! 👋</h1>
-          <p className="text-zinc-500 mt-2 flex items-center gap-2">
-            Serial: <span className="font-mono text-sm bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md border border-zinc-200 dark:border-zinc-700">{profile?.serialNumber || 'N/A'}</span>
-          </p>
-        </div>
-        {profile?.vip && (
-          <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-700 dark:text-amber-400 text-sm font-semibold border border-amber-500/20">
-            <Crown className="w-4 h-4" /> Premium Member
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header Card */}
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10" />
+        
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+            {profile.name.charAt(0)}
           </div>
-        )}
-      </motion.div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
-                  <Icon className="w-6 h-6" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold tracking-tight">{stat.value}</h3>
-              <p className="text-sm text-zinc-500 mt-1">{stat.label}</p>
-            </motion.div>
-          );
-        })}
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              {profile.name}
+              {profile.vip && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30">VIP</span>}
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">{profile.bio || "Player Asuma MD"}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-800">
+          <StatItem label="Pengikut" value={social.followers} icon={<Users className="w-4 h-4 text-blue-400" />} />
+          <StatItem label="Level" value={economy.level} icon={<Trophy className="w-4 h-4 text-yellow-400" />} />
+          <StatItem label="Dilihat" value={profile.profileViews} icon={<User className="w-4 h-4 text-purple-400" />} />
+        </div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="p-8 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm"
-      >
-        <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
-          Profile Details
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-2 block">Biography</label>
-            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
-              <p className="text-sm leading-relaxed">{profile?.bio || 'No bio set.'}</p>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-2 block">Referral Code</label>
-            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-              <code className="font-mono text-sm text-zinc-800 dark:text-zinc-200">
-                {profile?.referralCode || 'N/A'}
-              </code>
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(profile?.referralCode || '');
-                }}
-                className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors uppercase tracking-wider"
-              >
-                Copy
-              </button>
-            </div>
-          </div>
+      {/* Games Stats */}
+      <div>
+        <h3 className="text-sm font-semibold text-slate-400 mb-3 flex items-center gap-2">
+          <Gamepad2 className="w-4 h-4" /> Statistik Permainan
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <GameCard title="RPG Wins" value={games.rpgWins} color="text-green-400" bg="bg-green-500/10" />
+          <GameCard title="Dungeon Wins" value={games.dungeonWins} color="text-red-400" bg="bg-red-500/10" />
+          <GameCard title="Casino Wins" value={games.casinoWins} color="text-pink-400" bg="bg-pink-500/10" />
+          <GameCard title="Total EXP" value={economy.exp.toLocaleString()} color="text-blue-400" bg="bg-blue-500/10" />
         </div>
-      </motion.div>
-    </>
+      </div>
+
+      {/* Action Button */}
+      <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-900/20 active:scale-95">
+        Ikuti Pengguna
+      </button>
+    </div>
+  );
+}
+
+function StatItem({ label, value, icon }: any) {
+  return (
+    <div className="text-center">
+      <div className="flex justify-center mb-1">{icon}</div>
+      <div className="font-bold text-lg text-white">{value.toLocaleString()}</div>
+      <div className="text-xs text-slate-500 uppercase tracking-wider">{label}</div>
+    </div>
+  );
+}
+
+function GameCard({ title, value, color, bg }: any) {
+  return (
+    <div className={`p-4 rounded-2xl border border-slate-800 bg-slate-900/50 ${bg}`}>
+      <p className="text-xs text-slate-400 mb-1">{title}</p>
+      <p className={`text-xl font-bold ${color}`}>{value.toLocaleString()}</p>
+    </div>
   );
 }
