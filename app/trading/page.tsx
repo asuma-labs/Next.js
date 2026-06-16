@@ -94,10 +94,9 @@ export default function TradingPage() {
     const candleSeriesRef = useRef<any>(null);
     const volumeSeriesRef = useRef<any>(null);
     const selectedAssetRef = useRef<Asset | null>(null);
-    const mockIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const candleDataRef = useRef<any[]>([]);
-    useEffect(() => {
-        const t = getToken();
+
+    useEffect(() => {        const t = getToken();
         if (!t) {
             setIsGuest(true);
             setToken(null);
@@ -145,8 +144,8 @@ export default function TradingPage() {
                             if (assetsData.length > 0) {
                                 const firstAsset = assetsData[0];
                                 setSelectedAsset(firstAsset);
-                                                                if (data.marketData && data.marketData[firstAsset.id]) {
-                                    const marketData = data.marketData[firstAsset.id];
+                                
+                                if (data.marketData && data.marketData[firstAsset.id]) {                                    const marketData = data.marketData[firstAsset.id];
                                     if (marketData.history && marketData.history.length > 0) {
                                         const candles = marketData.history.map((h: any) => ({
                                             time: h.time as UTCTimestamp,
@@ -194,8 +193,8 @@ export default function TradingPage() {
                                     setAssets(prev => prev.map(asset =>
                                         asset.id === data.assetId
                                             ? { ...asset, price: lastTrade.price }
-                                            : asset                                    ));
-                                    if (selectedAsset?.id === data.assetId) {
+                                            : asset
+                                    ));                                    if (selectedAsset?.id === data.assetId) {
                                         setSelectedAsset(prev => prev ? { ...prev, price: lastTrade.price } : null);
                                     }
                                 }
@@ -243,8 +242,8 @@ export default function TradingPage() {
 
                 ws.onerror = () => {
                     setError('Koneksi WebSocket gagal');
-                    ws.close();                };
-            } catch (err) {
+                    ws.close();
+                };            } catch (err) {
                 setError('Gagal terhubung ke server');
                 setLoading(false);
             }
@@ -292,8 +291,8 @@ export default function TradingPage() {
             wickUpColor: '#0ecb81', wickDownColor: '#f6465d',
         });
         candleSeriesRef.current = candleSeries;
-        const volumeSeries = chart.addSeries(HistogramSeries, {
-            priceFormat: { type: 'volume' },
+
+        const volumeSeries = chart.addSeries(HistogramSeries, {            priceFormat: { type: 'volume' },
             priceScaleId: '',
         });
 
@@ -341,8 +340,8 @@ export default function TradingPage() {
         return () => {
             window.removeEventListener('resize', handleResize);
             if (chartRef.current) {
-                chartRef.current.remove();                chartRef.current = null;
-            }
+                chartRef.current.remove();
+                chartRef.current = null;            }
         };
     }, [selectedAsset, timeframe]);
 
@@ -390,8 +389,8 @@ export default function TradingPage() {
                     time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
                     side: Math.random() > 0.5 ? 'buy' : 'sell' as 'buy' | 'sell',
                 };
-                setLastTrades(prev => [newTrade, ...prev].slice(0, 15));            }, 3000);
-            return () => clearInterval(interval);
+                setLastTrades(prev => [newTrade, ...prev].slice(0, 15));
+            }, 3000);            return () => clearInterval(interval);
         }
     }, [selectedAsset, isGuest, connected]);
 
@@ -426,7 +425,7 @@ export default function TradingPage() {
 
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify({
-                type: 'trade',
+                action: 'trade',
                 assetId: selectedAsset.id,
                 side: isBuying ? 'buy' : 'sell',
                 type: orderType,
@@ -488,8 +487,8 @@ export default function TradingPage() {
                         <div>
                             <h1 className="text-lg font-bold flex items-center gap-2">
                                 {selectedAsset?.symbol || 'BTC'}/IDR
-                                <span className="text-xs font-normal text-zinc-500">{selectedAsset?.name || 'Bitcoin'}</span>                            </h1>
-                        </div>
+                                <span className="text-xs font-normal text-zinc-500">{selectedAsset?.name || 'Bitcoin'}</span>
+                            </h1>                        </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -537,8 +536,8 @@ export default function TradingPage() {
                                     >
                                         {tf}
                                     </button>
-                                ))}                            </div>
-                        </div>
+                                ))}
+                            </div>                        </div>
                         <div ref={chartContainerRef} className="w-full h-[400px] rounded-lg overflow-hidden" />
                     </div>
 
@@ -586,8 +585,8 @@ export default function TradingPage() {
                                     {isTrading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : `Konfirmasi ${isBuying ? 'Pembelian' : 'Penjualan'}`}
                                 </button>
                             </div>
-                        </div>                    )}
-
+                        </div>
+                    )}
                     {isGuest && (
                         <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-6 text-center">
                             <p className="text-cyan-600 dark:text-cyan-400 font-bold mb-2">Mode Tamu Aktif</p>
@@ -635,8 +634,8 @@ export default function TradingPage() {
                                     <div className="text-center py-8 text-zinc-500 text-sm">Riwayat transaksi akan muncul di sini</div>
                                 )}
                             </div>
-                        </div>                    )}
-                </div>
+                        </div>
+                    )}                </div>
 
                 <div className="lg:col-span-3 space-y-4">
                     <div className="bg-white dark:bg-[#181A20] rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
@@ -684,8 +683,8 @@ export default function TradingPage() {
                                     <span className={trade.side === 'buy' ? 'text-[#0ecb81]' : 'text-[#f6465d]'}>{trade.price.toLocaleString('id-ID')}</span>
                                     <span className="text-zinc-600 dark:text-zinc-400">{trade.amount}</span>
                                     <span className="text-zinc-500">{trade.time}</span>
-                                </div>                            ))}
-                        </div>
+                                </div>
+                            ))}                        </div>
                     </div>
 
                     {!isGuest && (
