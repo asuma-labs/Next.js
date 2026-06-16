@@ -1,4 +1,3 @@
-// app/contact/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -67,25 +66,25 @@ export default function ContactPage() {
 
   const contactMethods = [
     {
-      icon: <MessageCircle className="w-5 h-5" />,
+      icon: MessageCircle,
       label: 'WhatsApp Business',
-      value: '+62 812-3456-7890',
+      value: '+44 7920 601019',
       href: 'https://wa.me/message/WMS27AAA5BQHL1',
       color: 'text-green-500',
       bg: 'bg-green-500/10 border-green-500/20',
       description: 'Chat langsung dengan tim kami',
     },
     {
-      icon: <Phone className="w-5 h-5" />,
+      icon: Phone,
       label: 'Nomor WhatsApp',
-      value: '+62 812-3456-7890',
-      href: 'https://wa.me/6281234567890',
+      value: '+44 7920 601019',
+      href: 'https://wa.me/447920601019',
       color: 'text-emerald-500',
       bg: 'bg-emerald-500/10 border-emerald-500/20',
       description: 'Hubungi via nomor ini',
     },
     {
-      icon: <Mail className="w-5 h-5" />,
+      icon: Mail,
       label: 'Email',
       value: 'support@asuma.my.id',
       href: 'mailto:support@asuma.my.id',
@@ -94,7 +93,7 @@ export default function ContactPage() {
       description: 'Email untuk pertanyaan serius',
     },
     {
-      icon: <Github className="w-5 h-5" />,
+      icon: Github,
       label: 'GitHub',
       value: 'asuma-labs',
       href: 'https://github.com/asuma-labs',
@@ -129,7 +128,7 @@ export default function ContactPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-center space-y-4 mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-650 via-indigo-650 to-sky-650 dark:from-cyan-300 dark:via-sky-200 dark:to-indigo-300 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-600 via-indigo-600 to-sky-600 dark:from-cyan-300 dark:via-sky-200 dark:to-indigo-300 bg-clip-text text-transparent">
             Contact Us
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto text-lg leading-relaxed">
@@ -151,12 +150,12 @@ export default function ContactPage() {
               <div className="text-left">
                 <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Hubungi Langsung</p>
                 <a 
-                  href="https://wa.me/6281234567890" 
+                  href="https://wa.me/447920601019" 
                   target="_blank" 
                   rel="noreferrer"
                   className="text-xl font-bold text-green-600 dark:text-green-400 hover:underline flex items-center gap-2"
                 >
-                  +62 812-3456-7890
+                  +44 7920 601019
                   <MessageCircle className="w-4 h-4" />
                 </a>
               </div>
@@ -175,28 +174,31 @@ export default function ContactPage() {
           transition={{ delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10"
         >
-          {contactMethods.map((method, index) => (
-            <a
-              key={index}
-              href={method.href}
-              target={method.href.startsWith('http') ? '_blank' : undefined}
-              rel="noreferrer"
-              className={`p-6 rounded-2xl border ${method.bg} bg-white/60 dark:bg-zinc-900/40 backdrop-blur-sm hover:scale-105 transition-transform duration-200 flex items-start gap-4 group`}
-            >
-              <div className={`p-3 rounded-xl ${method.bg} shrink-0`}>
-                <div className={method.color}>
-                  {method.icon}
+          {contactMethods.map((method, index) => {
+            const IconComponent = method.icon;
+            return (
+              <a
+                key={index}
+                href={method.href}
+                target={method.href.startsWith('http') ? '_blank' : undefined}
+                rel="noreferrer"
+                className={`p-6 rounded-2xl border ${method.bg} bg-white/60 dark:bg-zinc-900/40 backdrop-blur-sm hover:scale-105 transition-transform duration-200 flex items-start gap-4 group`}
+              >
+                <div className={`p-3 rounded-xl ${method.bg} shrink-0`}>
+                  <div className={method.color}>
+                    <IconComponent className="w-5 h-5" />
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-zinc-900 dark:text-white">{method.label}</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono">{method.value}</p>
-                {method.description && (
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{method.description}</p>
-                )}
-              </div>
-            </a>
-          ))}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-zinc-900 dark:text-white">{method.label}</h3>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono">{method.value}</p>
+                  {method.description && (
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{method.description}</p>
+                  )}
+                </div>
+              </a>
+            );
+          })}
         </motion.div>
 
         <motion.div
@@ -295,7 +297,7 @@ export default function ContactPage() {
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all"
-                  placeholder="08xx-xxxx-xxxx (opsional)"
+                  placeholder="Contoh: +447920601019"
                 />
               </div>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1.5">
