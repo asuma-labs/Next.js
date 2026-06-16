@@ -23,7 +23,10 @@ export function Navigation() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-
+const isDashboardPage = pathname === '/dashboard' || pathname.match(/^\/[^\/]+$/);
+if (isDashboardPage) {
+  return null;
+}
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
