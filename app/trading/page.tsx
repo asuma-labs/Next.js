@@ -99,82 +99,80 @@ export default function TradingPage() {
                     setError(null);
                 };
 
-// app/trading/page.tsx — bagian useEffect WebSocket
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.log('📩 WebSocket message:', data);
 
-ws.onmessage = (event) => {
-    try {
-        const data = JSON.parse(event.data);
-        console.log('📩 WebSocket message:', data);
+                        if (data.type === 'init') {
+                            const initData = data as InitData;
+                            setAssets(initData.assets);
+                            setBalance(initData.balance);
+                            setPortfolio(initData.portfolio || []);
+                            setLoading(false);
 
-        if (data.type === 'init') {
-            const initData = data as InitData;
-            setAssets(initData.assets);
-            setBalance(initData.balance);
-            setPortfolio(initData.portfolio || []);
-            setLoading(false);
+                            if (initData.assets.length > 0) {
+                                setSelectedAsset(initData.assets[0]);
+                            }
 
-            if (initData.assets.length > 0) {
-                setSelectedAsset(initData.assets[0]);
-            }
+                            if (initData.history) {
+                                const assetId = initData.assets[0]?.id;
+                                if (assetId && initData.history[assetId]) {
+                                    historyDataRef.current = initData.history[assetId].map((h: any) => ({
+                                        time: h.time as UTCTimestamp,
+                                        value: h.value,
+                                    }));
+                                }
+                            }
+                        }
 
-            if (initData.history) {
-                const assetId = initData.assets[0]?.id;
-                if (assetId && initData.history[assetId]) {
-                    historyDataRef.current = initData.history[assetId].map((h: any) => ({
-                        time: h.time as UTCTimestamp,
-                        value: h.value,
-                    }));
-                }
-            }
-        }
+                        if (data.type === 'price_update') {
+                            setAssets(data.assets);
 
-        // ⭐ YANG DIUBAH: PRICE UPDATE + UPDATE CHART
-        if (data.type === 'price_update') {
-            setAssets(data.assets);
-            
-            // Update chart dengan harga terbaru
-            if (selectedAsset) {
-                const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
-                if (updatedAsset && seriesRef.current) {
-                    const time = Math.floor(Date.now() / 1000) as UTCTimestamp;
-                    const newPoint = { time, value: updatedAsset.price };
-                    
-                    // Simpan ke history
-                    historyDataRef.current.push(newPoint);
-                    if (historyDataRef.current.length > 200) {
-                        historyDataRef.current = historyDataRef.current.slice(-200);
+                            if (selectedAsset && seriesRef.current) {
+                                const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
+                                if (updatedAsset) {
+                                    const time = Math.floor(Date.now() / 1000) as UTCTimestamp;
+                                    const newPoint = { time, value: updatedAsset.price };
+
+                                    historyDataRef.current.push(newPoint);
+                                    if (historyDataRef.current.length > 200) {
+                                        historyDataRef.current = historyDataRef.current.slice(-200);
+                                    }
+
+                                    try {
+                                        seriesRef.current.update(newPoint);
+                                    } catch (err) {
+                                        console.error('Chart update error:', err);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (data.type === 'trade_success') {
+                            const tradeData = data as TradeSuccessData;
+                            setBalance(tradeData.balance);
+                            setPortfolio(tradeData.portfolio);
+                            setMessage({
+                                text: `✅ Berhasil ${tradeData.action === 'buy' ? 'membeli' : 'menjual'} ${tradeData.amount} ${tradeData.asset.symbol}!`,
+                                type: 'success',
+                            });
+                            setTimeout(() => setMessage(null), 4000);
+                            setIsTrading(false);
+                        }
+
+                        if (data.type === 'trade_error') {
+                            setMessage({
+                                text: data.error || 'Trade gagal!',
+                                type: 'error',
+                            });
+                            setTimeout(() => setMessage(null), 4000);
+                            setIsTrading(false);
+                        }
+                    } catch (err) {
+                        console.error('Parse error:', err);
                     }
-                    
-                    // Update chart
-                    seriesRef.current.update(newPoint);
-                }
-            }
-        }
-
-        if (data.type === 'trade_success') {
-            const tradeData = data as TradeSuccessData;
-            setBalance(tradeData.balance);
-            setPortfolio(tradeData.portfolio);
-            setMessage({
-                text: `✅ Berhasil ${tradeData.action === 'buy' ? 'membeli' : 'menjual'} ${tradeData.amount} ${tradeData.asset.symbol}!`,
-                type: 'success',
-            });
-            setTimeout(() => setMessage(null), 4000);
-            setIsTrading(false);
-        }
-
-        if (data.type === 'trade_error') {
-            setMessage({
-                text: data.error || 'Trade gagal!',
-                type: 'error',
-            });
-            setTimeout(() => setMessage(null), 4000);
-            setIsTrading(false);
-        }
-    } catch (err) {
-        console.error('Parse error:', err);
-    }
-};
+                };
 
                 ws.onclose = () => {
                     console.log('❌ WebSocket disconnected');
@@ -245,7 +243,6 @@ ws.onmessage = (event) => {
 
         seriesRef.current = areaSeries;
 
-        // Pake data history dari WebSocket atau generate dummy
         let chartData = historyDataRef.current;
         if (!chartData || chartData.length === 0) {
             const now = new Date();
@@ -262,7 +259,11 @@ ws.onmessage = (event) => {
             historyDataRef.current = chartData;
         }
 
-        areaSeries.setData(chartData);
+        try {
+            areaSeries.setData(chartData);
+        } catch (err) {
+            console.error('Chart setData error:', err);
+        }
 
         const handleResize = () => {
             if (chartContainerRef.current) {
