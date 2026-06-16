@@ -1,8 +1,8 @@
+// app/trading/page.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
 import Link from 'next/link';
 import {
     ArrowLeft,
@@ -18,7 +18,7 @@ import {
     Loader2,
 } from 'lucide-react';
 import { getToken } from '@/lib/auth';
-import { createChart, ColorType, CrosshairMode } from 'lightweight-charts';
+import { createChart, ColorType, CrosshairMode, AreaSeries } from 'lightweight-charts';
 
 interface Asset {
     id: string;
@@ -205,7 +205,7 @@ export default function TradingPage() {
 
         chartRef.current = chart;
 
-        const areaSeries = chart.addSeries('Area', {
+        const areaSeries = chart.addSeries(AreaSeries, {
             lineColor: '#00e5a0',
             topColor: '#00e5a030',
             bottomColor: '#00e5a005',
@@ -222,7 +222,7 @@ export default function TradingPage() {
             const randomChange = (Math.random() - 0.5) * 1000;
             data.push({
                 time: Math.floor(time.getTime() / 1000),
-                value: basePrice + randomChange,
+                value: Math.max(basePrice + randomChange, 100),
             });
         }
 
