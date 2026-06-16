@@ -14,8 +14,11 @@ import {
   AlertCircle,
   User,
   AtSign,
-  FileText
+  FileText,
+  Phone,
+  Clock
 } from 'lucide-react';
+import { apiFetch } from '@/lib/auth';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -33,12 +36,19 @@ export default function ContactPage() {
     setIsSubmitting(true);
     setError('');
 
-    // Simulasi pengiriman (nanti bisa diganti dengan API real)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setIsSuccess(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setIsSuccess(false), 5000);
+      const res = await apiFetch('/api/contact', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+
+      if (res.success) {
+        setIsSuccess(true);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        setTimeout(() => setIsSuccess(false), 5000);
+      } else {
+        setError(res.error || 'Gagal mengirim pesan');
+      }
     } catch (err) {
       setError('Gagal mengirim pesan. Silakan coba lagi.');
     } finally {
@@ -56,11 +66,21 @@ export default function ContactPage() {
   const contactMethods = [
     {
       icon: <MessageCircle className="w-5 h-5" />,
-      label: 'WhatsApp',
+      label: 'WhatsApp Business',
       value: '+62 812-3456-7890',
-      href: 'https://wa.me/6281234567890',
+      href: 'https://wa.me/message/WMS27AAA5BQHL1',
       color: 'text-green-500',
       bg: 'bg-green-500/10 border-green-500/20',
+      description: 'Chat langsung dengan tim kami',
+    },
+    {
+      icon: <Phone className="w-5 h-5" />,
+      label: 'Nomor WhatsApp',
+      value: '+62 812-3456-7890',
+      href: 'https://wa.me/6281234567890',
+      color: 'text-emerald-500',
+      bg: 'bg-emerald-500/10 border-emerald-500/20',
+      description: 'Hubungi via nomor ini',
     },
     {
       icon: <Mail className="w-5 h-5" />,
@@ -69,6 +89,7 @@ export default function ContactPage() {
       href: 'mailto:support@asuma.my.id',
       color: 'text-blue-500',
       bg: 'bg-blue-500/10 border-blue-500/20',
+      description: 'Email untuk pertanyaan serius',
     },
     {
       icon: <Github className="w-5 h-5" />,
@@ -77,19 +98,18 @@ export default function ContactPage() {
       href: 'https://github.com/asuma-labs',
       color: 'text-zinc-700 dark:text-zinc-300',
       bg: 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700',
+      description: 'Lihat source code & kontribusi',
     },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-slate-100 to-indigo-50/50 dark:from-[#060D1F] dark:via-[#0A1628] dark:to-[#0D1B2E] text-zinc-900 dark:text-white transition-colors duration-300 p-6 pt-24 pb-24 relative overflow-hidden">
-      {/* Background Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl opacity-75 dark:opacity-100" />
         <div className="absolute bottom-0 right-1/4 w-96 h-64 rounded-full bg-indigo-500/10 blur-3xl opacity-75 dark:opacity-100" />
       </div>
 
       <div className="w-full max-w-4xl mx-auto relative z-10">
-        {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -15 }}
           animate={{ opacity: 1, x: 0 }}
@@ -101,7 +121,6 @@ export default function ContactPage() {
           </Link>
         </motion.div>
 
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,12 +135,11 @@ export default function ContactPage() {
           </p>
         </motion.div>
 
-        {/* Contact Methods */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10"
         >
           {contactMethods.map((method, index) => (
             <a
@@ -129,20 +147,46 @@ export default function ContactPage() {
               href={method.href}
               target={method.href.startsWith('http') ? '_blank' : undefined}
               rel="noreferrer"
-              className={`p-6 rounded-2xl border ${method.bg} bg-white/60 dark:bg-zinc-900/40 backdrop-blur-sm hover:scale-105 transition-transform duration-200 flex flex-col items-center text-center group`}
+              className={`p-6 rounded-2xl border ${method.bg} bg-white/60 dark:bg-zinc-900/40 backdrop-blur-sm hover:scale-105 transition-transform duration-200 flex items-start gap-4 group`}
             >
-              <div className={`p-3 rounded-xl ${method.bg} mb-3`}>
+              <div className={`p-3 rounded-xl ${method.bg} shrink-0`}>
                 <div className={method.color}>
                   {method.icon}
                 </div>
               </div>
-              <h3 className="font-semibold text-zinc-900 dark:text-white">{method.label}</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{method.value}</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-zinc-900 dark:text-white">{method.label}</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono">{method.value}</p>
+                {method.description && (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{method.description}</p>
+                )}
+              </div>
             </a>
           ))}
         </motion.div>
 
-        {/* Form */}
+        {/* Info Jam Operasional */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="p-4 rounded-2xl bg-cyan-500/5 border border-cyan-500/10 mb-10 flex flex-col sm:flex-row items-center justify-between gap-3"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-cyan-500/10">
+              <Clock className="w-5 h-5 text-cyan-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-zinc-900 dark:text-white">Jam Operasional</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Senin - Jumat, 09:00 - 21:00 WIB</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-zinc-600 dark:text-zinc-400">Fast Response</span>
+          </div>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -172,7 +216,7 @@ export default function ContactPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Nama Lengkap
+                  Nama Lengkap <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -189,7 +233,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Email
+                  Email <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -208,7 +252,7 @@ export default function ContactPage() {
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Subjek
+                Subjek <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -226,7 +270,7 @@ export default function ContactPage() {
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Pesan
+                Pesan <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="message"
