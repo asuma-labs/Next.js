@@ -10,7 +10,6 @@ import {
     LogIn,
     ArrowUp,
     ArrowDown,
-    Clock,
     X,
     TrendingUp,
     Activity
@@ -47,8 +46,8 @@ interface OpenOrder {
     time: string;
 }
 
-interface TradeHistory {    id: string;
-    price: number;
+interface TradeHistory {
+    id: string;    price: number;
     amount: number;
     time: string;
     side: 'buy' | 'sell';
@@ -128,7 +127,6 @@ export default function TradingPage() {
                 wsRef.current = ws;
 
                 ws.onopen = () => {
-                    console.log('✅ WebSocket connected');
                     setConnected(true);
                     setError(null);
                 };
@@ -136,7 +134,6 @@ export default function TradingPage() {
                 ws.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
-                        console.log('📩 WebSocket message:', data.type, data);
 
                         if (data.type === 'init') {
                             const assetsData = data.assets || [];
@@ -145,10 +142,10 @@ export default function TradingPage() {
                             setPortfolio(data.portfolio || []);
                             setLoading(false);
 
-                            if (assetsData.length > 0) {                                const firstAsset = assetsData[0];
+                            if (assetsData.length > 0) {
+                                const firstAsset = assetsData[0];
                                 setSelectedAsset(firstAsset);
-                                
-                                if (data.marketData && data.marketData[firstAsset.id]) {
+                                                                if (data.marketData && data.marketData[firstAsset.id]) {
                                     const marketData = data.marketData[firstAsset.id];
                                     if (marketData.history && marketData.history.length > 0) {
                                         const candles = marketData.history.map((h: any) => ({
@@ -194,10 +191,10 @@ export default function TradingPage() {
                                 
                                 const lastTrade = data.trades[data.trades.length - 1];
                                 if (data.assetId) {
-                                    setAssets(prev => prev.map(asset =>                                        asset.id === data.assetId
+                                    setAssets(prev => prev.map(asset =>
+                                        asset.id === data.assetId
                                             ? { ...asset, price: lastTrade.price }
-                                            : asset
-                                    ));
+                                            : asset                                    ));
                                     if (selectedAsset?.id === data.assetId) {
                                         setSelectedAsset(prev => prev ? { ...prev, price: lastTrade.price } : null);
                                     }
@@ -213,15 +210,8 @@ export default function TradingPage() {
                             setTimeout(() => setMessage(null), 4000);
                             setIsTrading(false);
                             
-                            const portfolioData = data.portfolio;
-                            if (portfolioData) {
-                                setPortfolio(portfolioData);
-                            }
-                            
-                            const balanceData = data.balance;
-                            if (balanceData !== undefined) {
-                                setBalance(balanceData);
-                            }
+                            if (data.portfolio) setPortfolio(data.portfolio);
+                            if (data.balance !== undefined) setBalance(data.balance);
                         }
 
                         if (data.type === 'order_placed') {
@@ -236,33 +226,25 @@ export default function TradingPage() {
                                 time: new Date(data.order.createdAt).toLocaleTimeString('id-ID'),
                             };
                             setOpenOrders(prev => [newOrder, ...prev]);
-                            setMessage({
-                                text: 'Order limit berhasil dibuat',
-                                type: 'success',
-                            });
+                            setMessage({ text: 'Order limit berhasil dibuat', type: 'success' });
                             setTimeout(() => setMessage(null), 4000);
                             setIsTrading(false);
                         }
-                    } catch (err) {                        console.error('Parse error:', err);
+                    } catch (err) {
+                        console.error('Parse error:', err);
                     }
                 };
 
                 ws.onclose = () => {
-                    console.log('❌ WebSocket disconnected');
                     setConnected(false);
-                    if (reconnectTimeout.current) {
-                        clearTimeout(reconnectTimeout.current);
-                    }
+                    if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
                     reconnectTimeout.current = setTimeout(connectWebSocket, 3000);
                 };
 
-                ws.onerror = (error) => {
-                    console.error('WebSocket error:', error);
+                ws.onerror = () => {
                     setError('Koneksi WebSocket gagal');
-                    ws.close();
-                };
+                    ws.close();                };
             } catch (err) {
-                console.error('WebSocket connection failed:', err);
                 setError('Gagal terhubung ke server');
                 setLoading(false);
             }
@@ -292,7 +274,8 @@ export default function TradingPage() {
             layout: {
                 background: { color: '#0B0E11' },
                 textColor: '#d1d5db',
-            },            grid: {
+            },
+            grid: {
                 vertLines: { color: '#1e2330' },
                 horzLines: { color: '#1e2330' },
             },
@@ -309,12 +292,15 @@ export default function TradingPage() {
             wickUpColor: '#0ecb81', wickDownColor: '#f6465d',
         });
         candleSeriesRef.current = candleSeries;
-
         const volumeSeries = chart.addSeries(HistogramSeries, {
             priceFormat: { type: 'volume' },
             priceScaleId: '',
+        });
+
+        chart.priceScale('').applyOptions({
             scaleMargins: { top: 0.8, bottom: 0 },
         });
+
         volumeSeriesRef.current = volumeSeries;
 
         const now = new Date();
@@ -341,7 +327,8 @@ export default function TradingPage() {
         }
 
         candleDataRef.current = mockCandles;
-        candleSeries.setData(mockCandles);        volumeSeries.setData(mockVolumes);
+        candleSeries.setData(mockCandles);
+        volumeSeries.setData(mockVolumes);
         chart.timeScale().fitContent();
 
         const handleResize = () => {
@@ -354,8 +341,7 @@ export default function TradingPage() {
         return () => {
             window.removeEventListener('resize', handleResize);
             if (chartRef.current) {
-                chartRef.current.remove();
-                chartRef.current = null;
+                chartRef.current.remove();                chartRef.current = null;
             }
         };
     }, [selectedAsset, timeframe]);
@@ -390,7 +376,8 @@ export default function TradingPage() {
                     candleSeriesRef.current.update(updatedCandle);
                 }
             };
-            if (isGuest) updateData(selectedAsset.price);        }
+            if (isGuest) updateData(selectedAsset.price);
+        }
     }, [assets, isGuest, selectedAsset]);
 
     useEffect(() => {
@@ -403,8 +390,7 @@ export default function TradingPage() {
                     time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
                     side: Math.random() > 0.5 ? 'buy' : 'sell' as 'buy' | 'sell',
                 };
-                setLastTrades(prev => [newTrade, ...prev].slice(0, 15));
-            }, 3000);
+                setLastTrades(prev => [newTrade, ...prev].slice(0, 15));            }, 3000);
             return () => clearInterval(interval);
         }
     }, [selectedAsset, isGuest, connected]);
@@ -439,7 +425,8 @@ export default function TradingPage() {
         setIsTrading(true);
 
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-            wsRef.current.send(JSON.stringify({                type: 'trade',
+            wsRef.current.send(JSON.stringify({
+                type: 'trade',
                 assetId: selectedAsset.id,
                 side: isBuying ? 'buy' : 'sell',
                 type: orderType,
@@ -453,7 +440,6 @@ export default function TradingPage() {
 
         setTradeAmount('');
     };
-
     const cancelOrder = (id: string) => {
         setOpenOrders(prev => prev.filter(o => o.id !== id));
         setMessage({ text: 'Order berhasil dibatalkan', type: 'success' });
@@ -466,7 +452,6 @@ export default function TradingPage() {
     }, [tradeAmount, limitPrice, selectedAsset, orderType]);
 
     const fee = estimatedTotal * 0.001;
-    const receiveAmount = isBuying ? parseFloat(tradeAmount) || 0 : estimatedTotal - fee;
 
     const getAssetColor = (id: string) => {
         switch (id) {
@@ -488,6 +473,7 @@ export default function TradingPage() {
             </div>
         );
     }
+
     return (
         <div className="min-h-screen bg-zinc-50 dark:bg-[#0B0E11] text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
             <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#181A20] px-4 py-3 flex items-center justify-between sticky top-0 z-30">
@@ -502,8 +488,7 @@ export default function TradingPage() {
                         <div>
                             <h1 className="text-lg font-bold flex items-center gap-2">
                                 {selectedAsset?.symbol || 'BTC'}/IDR
-                                <span className="text-xs font-normal text-zinc-500">{selectedAsset?.name || 'Bitcoin'}</span>
-                            </h1>
+                                <span className="text-xs font-normal text-zinc-500">{selectedAsset?.name || 'Bitcoin'}</span>                            </h1>
                         </div>
                     </div>
                 </div>
@@ -537,7 +522,8 @@ export default function TradingPage() {
                                 </div>
                             </div>
                             <div className="flex gap-6 text-xs">
-                                <div><span className="text-zinc-500 block">24h High</span><span className="font-semibold">Rp {selectedAsset?.high24h.toLocaleString('id-ID') || 0}</span></div>                                <div><span className="text-zinc-500 block">24h Low</span><span className="font-semibold">Rp {selectedAsset?.low24h.toLocaleString('id-ID') || 0}</span></div>
+                                <div><span className="text-zinc-500 block">24h High</span><span className="font-semibold">Rp {selectedAsset?.high24h.toLocaleString('id-ID') || 0}</span></div>
+                                <div><span className="text-zinc-500 block">24h Low</span><span className="font-semibold">Rp {selectedAsset?.low24h.toLocaleString('id-ID') || 0}</span></div>
                                 <div><span className="text-zinc-500 block">24h Volume</span><span className="font-semibold">{selectedAsset ? (selectedAsset.volume24h / 1000000).toFixed(1) + 'M' : '0'}</span></div>
                             </div>
                             <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
@@ -551,8 +537,7 @@ export default function TradingPage() {
                                     >
                                         {tf}
                                     </button>
-                                ))}
-                            </div>
+                                ))}                            </div>
                         </div>
                         <div ref={chartContainerRef} className="w-full h-[400px] rounded-lg overflow-hidden" />
                     </div>
@@ -586,7 +571,8 @@ export default function TradingPage() {
                                     </div>
                                 </div>
 
-                                <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-lg p-3 space-y-2 text-sm">                                    <div className="flex justify-between"><span className="text-zinc-500">Estimasi Total</span><span className="font-medium">Rp {estimatedTotal.toLocaleString('id-ID')}</span></div>
+                                <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-lg p-3 space-y-2 text-sm">
+                                    <div className="flex justify-between"><span className="text-zinc-500">Estimasi Total</span><span className="font-medium">Rp {estimatedTotal.toLocaleString('id-ID')}</span></div>
                                     <div className="flex justify-between"><span className="text-zinc-500">Fee (0.1%)</span><span className="font-medium">Rp {fee.toLocaleString('id-ID')}</span></div>
                                     <div className="flex justify-between border-t border-zinc-200 dark:border-zinc-800 pt-2">
                                         <span className="text-zinc-500">{isBuying ? 'Diterima' : 'Total Diterima (IDR)'}</span>
@@ -600,8 +586,7 @@ export default function TradingPage() {
                                     {isTrading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : `Konfirmasi ${isBuying ? 'Pembelian' : 'Penjualan'}`}
                                 </button>
                             </div>
-                        </div>
-                    )}
+                        </div>                    )}
 
                     {isGuest && (
                         <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-6 text-center">
@@ -635,7 +620,8 @@ export default function TradingPage() {
                                                             <div className="font-medium">{order.symbol} <span className="text-zinc-500 text-xs">Limit</span></div>
                                                             <div className="text-xs text-zinc-500">{order.time}</div>
                                                         </div>
-                                                    </div>                                                    <div className="text-right">
+                                                    </div>
+                                                    <div className="text-right">
                                                         <div className="font-medium">{order.amount} @ Rp {order.price.toLocaleString('id-ID')}</div>
                                                         <div className="text-xs text-zinc-500">Total: Rp {order.total.toLocaleString('id-ID')}</div>
                                                     </div>
@@ -649,8 +635,7 @@ export default function TradingPage() {
                                     <div className="text-center py-8 text-zinc-500 text-sm">Riwayat transaksi akan muncul di sini</div>
                                 )}
                             </div>
-                        </div>
-                    )}
+                        </div>                    )}
                 </div>
 
                 <div className="lg:col-span-3 space-y-4">
@@ -684,7 +669,8 @@ export default function TradingPage() {
                                         <span className="text-[#0ecb81] relative z-10">{price.toLocaleString('id-ID')}</span>
                                         <span className="text-zinc-600 dark:text-zinc-400 relative z-10">{(Math.random() * 2).toFixed(4)}</span>
                                     </div>
-                                );                            })}
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -698,8 +684,7 @@ export default function TradingPage() {
                                     <span className={trade.side === 'buy' ? 'text-[#0ecb81]' : 'text-[#f6465d]'}>{trade.price.toLocaleString('id-ID')}</span>
                                     <span className="text-zinc-600 dark:text-zinc-400">{trade.amount}</span>
                                     <span className="text-zinc-500">{trade.time}</span>
-                                </div>
-                            ))}
+                                </div>                            ))}
                         </div>
                     </div>
 
@@ -721,7 +706,7 @@ export default function TradingPage() {
                                         <div key={p.id} className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg">
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`font-bold text-sm`}>{p.symbol}</span>
+                                                    <span className="font-bold text-sm">{p.symbol}</span>
                                                     <span className="text-xs text-zinc-500">{p.amount.toFixed(4)}</span>
                                                 </div>
                                                 <div className={`text-xs font-medium ${pnl >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
@@ -733,7 +718,8 @@ export default function TradingPage() {
                                     );
                                 })}
                             </div>
-                        </div>                    )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
