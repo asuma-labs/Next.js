@@ -1,4 +1,3 @@
-// app/trading/page.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -48,8 +47,7 @@ interface TradeSuccessData {
 interface InitData {
     type: 'init';
     assets: Asset[];
-    balance: number;
-    portfolio: PortfolioAsset[];
+    balance: number;    portfolio: PortfolioAsset[];
     history: Record<string, { time: number; value: number }[]>;
 }
 
@@ -75,6 +73,7 @@ export default function TradingPage() {
     const chartRef = useRef<any>(null);
     const seriesRef = useRef<any>(null);
     const historyDataRef = useRef<{ time: UTCTimestamp; value: number }[]>([]);
+    const selectedAssetRef = useRef<Asset | null>(null);
 
     useEffect(() => {
         const t = getToken();
@@ -86,6 +85,10 @@ export default function TradingPage() {
     }, [router]);
 
     useEffect(() => {
+        selectedAssetRef.current = selectedAsset;
+    }, [selectedAsset]);
+
+    useEffect(() => {
         if (!token) return;
 
         const connectWebSocket = () => {
@@ -93,16 +96,13 @@ export default function TradingPage() {
                 const ws = new WebSocket(`wss://db.asuma.my.id?token=${token}`);
                 wsRef.current = ws;
 
-                ws.onopen = () => {
-                    console.log('✅ WebSocket connected');
-                    setConnected(true);
+                ws.onopen = () => {                    setConnected(true);
                     setError(null);
                 };
 
                 ws.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
-                        console.log('📩 WebSocket message:', data);
 
                         if (data.type === 'init') {
                             const initData = data as InitData;
@@ -115,9 +115,9 @@ export default function TradingPage() {
                                 setSelectedAsset(initData.assets[0]);
                             }
 
-                            if (initData.history) {
-                                const assetId = initData.assets[0]?.id;
-                                if (assetId && initData.history[assetId]) {
+                            if (initData.history && initData.assets[0]) {
+                                const assetId = initData.assets[0].id;
+                                if (initData.history[assetId]) {
                                     historyDataRef.current = initData.history[assetId].map((h: any) => ({
                                         time: h.time as UTCTimestamp,
                                         value: h.value,
@@ -129,10 +129,14 @@ export default function TradingPage() {
                         if (data.type === 'price_update') {
                             setAssets(data.assets);
 
-                            if (selectedAsset && seriesRef.current) {
-                                const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
+                            const currentAsset = selectedAssetRef.current;
+                            if (currentAsset && seriesRef.current) {
+                                const updatedAsset = data.assets.find((a: Asset) => a.id === currentAsset.id);
                                 if (updatedAsset) {
-                                    const time = Math.floor(Date.now() / 1000) as UTCTimestamp;
+                                    const now = Math.floor(Date.now() / 1000) as UTCTimestamp;
+                                    const lastTime = historyDataRef.current[historyDataRef.current.length - 1]?.time || 0;
+                                    const time = now > lastTime ? now : (lastTime + 1) as UTCTimestamp;
+                                    
                                     const newPoint = { time, value: updatedAsset.price };
 
                                     historyDataRef.current.push(newPoint);
@@ -141,8 +145,7 @@ export default function TradingPage() {
                                     }
 
                                     try {
-                                        seriesRef.current.update(newPoint);
-                                    } catch (err) {
+                                        seriesRef.current.update(newPoint);                                    } catch (err) {
                                         console.error('Chart update error:', err);
                                     }
                                 }
@@ -154,7 +157,7 @@ export default function TradingPage() {
                             setBalance(tradeData.balance);
                             setPortfolio(tradeData.portfolio);
                             setMessage({
-                                text: `✅ Berhasil ${tradeData.action === 'buy' ? 'membeli' : 'menjual'} ${tradeData.amount} ${tradeData.asset.symbol}!`,
+                                text: `Berhasil ${tradeData.action === 'buy' ? 'membeli' : 'menjual'} ${tradeData.amount} ${tradeData.asset.symbol}`,
                                 type: 'success',
                             });
                             setTimeout(() => setMessage(null), 4000);
@@ -175,7 +178,6 @@ export default function TradingPage() {
                 };
 
                 ws.onclose = () => {
-                    console.log('❌ WebSocket disconnected');
                     setConnected(false);
                     if (reconnectTimeout.current) {
                         clearTimeout(reconnectTimeout.current);
@@ -192,8 +194,7 @@ export default function TradingPage() {
                 console.error('WebSocket connection failed:', err);
                 setError('Gagal terhubung ke server');
                 setLoading(false);
-            }
-        };
+            }        };
 
         connectWebSocket();
 
@@ -205,6 +206,12 @@ export default function TradingPage() {
 
     useEffect(() => {
         if (!chartContainerRef.current || !selectedAsset) return;
+
+        if (chartRef.current) {
+            chartRef.current.remove();
+            chartRef.current = null;
+            seriesRef.current = null;
+        }
 
         const isDark = document.documentElement.classList.contains('dark');
 
@@ -236,8 +243,7 @@ export default function TradingPage() {
 
         const areaSeries = chart.addSeries(AreaSeries, {
             lineColor: '#00e5a0',
-            topColor: '#00e5a030',
-            bottomColor: '#00e5a005',
+            topColor: '#00e5a030',            bottomColor: '#00e5a005',
             lineWidth: 2,
         });
 
@@ -261,13 +267,14 @@ export default function TradingPage() {
 
         try {
             areaSeries.setData(chartData);
+            chart.timeScale().fitContent();
         } catch (err) {
             console.error('Chart setData error:', err);
         }
 
         const handleResize = () => {
-            if (chartContainerRef.current) {
-                chart.applyOptions({
+            if (chartContainerRef.current && chartRef.current) {
+                chartRef.current.applyOptions({
                     width: chartContainerRef.current.clientWidth,
                 });
             }
@@ -277,12 +284,15 @@ export default function TradingPage() {
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            chart.remove();
+            if (chartRef.current) {
+                chartRef.current.remove();
+                chartRef.current = null;
+                seriesRef.current = null;
+            }
         };
     }, [selectedAsset]);
 
-    const handleTrade = () => {
-        if (!selectedAsset || !tradeAmount || !wsRef.current) {
+    const handleTrade = () => {        if (!selectedAsset || !tradeAmount || !wsRef.current) {
             setMessage({ text: 'Pilih aset dan masukkan jumlah', type: 'error' });
             return;
         }
@@ -331,8 +341,7 @@ export default function TradingPage() {
             case 'eth': return 'text-indigo-500';
             case 'sbn': return 'text-emerald-500';
             case 'gauge': return 'text-purple-500';
-            default: return 'text-zinc-500';
-        }
+            default: return 'text-zinc-500';        }
     };
 
     if (loading) {
@@ -381,7 +390,6 @@ export default function TradingPage() {
                         <span className="text-zinc-500">{connected ? 'Live' : 'Reconnecting...'}</span>
                     </div>
                 </div>
-
                 <div className="text-center space-y-4 mb-8">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-650 via-indigo-650 to-sky-650 dark:from-cyan-300 dark:via-sky-200 dark:to-indigo-300 bg-clip-text text-transparent">
                         Virtual Trading
@@ -431,8 +439,7 @@ export default function TradingPage() {
                                     const userAsset = portfolio.find((p) => p.id === asset.id);
                                     return (
                                         <button
-                                            key={asset.id}
-                                            onClick={() => setSelectedAsset(asset)}
+                                            key={asset.id}                                            onClick={() => setSelectedAsset(asset)}
                                             className={`w-full flex items-center justify-between p-2 rounded-lg transition-all text-sm ${isSelected
                                                     ? 'bg-cyan-500/10 border border-cyan-500/20'
                                                     : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'
@@ -481,8 +488,7 @@ export default function TradingPage() {
                             <div ref={chartContainerRef} className="w-full h-[400px]" />
 
                             <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                                <div className="flex-1">                                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
                                         Jumlah {selectedAsset?.symbol || ''}
                                     </label>
                                     <input
@@ -531,8 +537,7 @@ export default function TradingPage() {
                                     </button>
                                     <button
                                         onClick={() => setIsBuying(false)}
-                                        className={`px-6 py-2.5 rounded-xl font-semibold transition-all ${!isBuying
-                                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
+                                        className={`px-6 py-2.5 rounded-xl font-semibold transition-all ${!isBuying                                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
                                                 : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                                             }`}
                                     >
@@ -581,8 +586,7 @@ export default function TradingPage() {
                                             const currentValue = p.amount * asset.price;
                                             const profit = currentValue - p.amount * p.buyPrice;
 
-                                            return (
-                                                <div
+                                            return (                                                <div
                                                     key={p.id}
                                                     className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800"
                                                 >
