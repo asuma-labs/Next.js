@@ -45,6 +45,14 @@ interface TradeSuccessData {
     portfolio: PortfolioAsset[];
 }
 
+interface InitData {
+    type: 'init';
+    assets: Asset[];
+    balance: number;
+    portfolio: PortfolioAsset[];
+    history: Record<string, { time: number; value: number }[]>;
+}
+
 export default function TradingPage() {
     const router = useRouter();
     const [token, setToken] = useState<string | null>(null);
@@ -66,6 +74,7 @@ export default function TradingPage() {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<any>(null);
     const seriesRef = useRef<any>(null);
+    const historyDataRef = useRef<{ time: UTCTimestamp; value: number }[]>([]);
 
     useEffect(() => {
         const t = getToken();
@@ -88,7 +97,6 @@ export default function TradingPage() {
                     console.log('✅ WebSocket connected');
                     setConnected(true);
                     setError(null);
-                    setLoading(false);
                 };
 
                 ws.onmessage = (event) => {
@@ -97,12 +105,25 @@ export default function TradingPage() {
                         console.log('📩 WebSocket message:', data);
 
                         if (data.type === 'init') {
-                            setAssets(data.assets);
-                            setBalance(data.balance);
-                            setPortfolio(data.portfolio || []);
+                            const initData = data as InitData;
+                            setAssets(initData.assets);
+                            setBalance(initData.balance);
+                            setPortfolio(initData.portfolio || []);
                             setLoading(false);
-                            if (data.assets.length > 0) {
-                                setSelectedAsset(data.assets[0]);
+
+                            if (initData.assets.length > 0) {
+                                setSelectedAsset(initData.assets[0]);
+                            }
+
+                            // Simpan history untuk chart
+                            if (initData.history) {
+                                const assetId = initData.assets[0]?.id;
+                                if (assetId && initData.history[assetId]) {
+                                    historyDataRef.current = initData.history[assetId].map((h: any) => ({
+                                        time: h.time as UTCTimestamp,
+                                        value: h.value,
+                                    }));
+                                }
                             }
                         }
 
@@ -112,10 +133,12 @@ export default function TradingPage() {
                                 const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
                                 if (updatedAsset && seriesRef.current) {
                                     const time = Math.floor(Date.now() / 1000) as UTCTimestamp;
-                                    seriesRef.current.update({
-                                        time: time,
-                                        value: updatedAsset.price,
-                                    });
+                                    const newPoint = { time, value: updatedAsset.price };
+                                    historyDataRef.current.push(newPoint);
+                                    if (historyDataRef.current.length > 200) {
+                                        historyDataRef.current = historyDataRef.current.slice(-200);
+                                    }
+                                    seriesRef.current.update(newPoint);
                                 }
                             }
                         }
@@ -214,19 +237,24 @@ export default function TradingPage() {
 
         seriesRef.current = areaSeries;
 
-        const now = new Date();
-        const data = [];
-        for (let i = 0; i < 30; i++) {
-            const time = new Date(now.getTime() - (30 - i) * 10000);
-            const basePrice = selectedAsset.price || 965000;
-            const randomChange = (Math.random() - 0.5) * 1000;
-            data.push({
-                time: Math.floor(time.getTime() / 1000) as UTCTimestamp,
-                value: Math.max(basePrice + randomChange, 100),
-            });
+        // Pake data history dari WebSocket atau generate dummy
+        let chartData = historyDataRef.current;
+        if (!chartData || chartData.length === 0) {
+            const now = new Date();
+            chartData = [];
+            for (let i = 0; i < 30; i++) {
+                const time = new Date(now.getTime() - (30 - i) * 10000);
+                const basePrice = selectedAsset.price || 965000;
+                const randomChange = (Math.random() - 0.5) * 1000;
+                chartData.push({
+                    time: Math.floor(time.getTime() / 1000) as UTCTimestamp,
+                    value: Math.max(basePrice + randomChange, 100),
+                });
+            }
+            historyDataRef.current = chartData;
         }
 
-        areaSeries.setData(data);
+        areaSeries.setData(chartData);
 
         const handleResize = () => {
             if (chartContainerRef.current) {
@@ -349,6 +377,9 @@ export default function TradingPage() {
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-650 via-indigo-650 to-sky-650 dark:from-cyan-300 dark:via-sky-200 dark:to-indigo-300 bg-clip-text text-transparent">
                         Virtual Trading
                     </h1>
+                    <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto text-lg leading-relaxed">
+                        Trading aset virtual secara real-time dengan data historis
+                    </p>
                 </div>
 
                 {message && (
