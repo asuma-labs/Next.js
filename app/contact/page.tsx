@@ -16,7 +16,8 @@ import {
   AtSign,
   FileText,
   Phone,
-  Clock
+  Clock,
+  Smartphone
 } from 'lucide-react';
 import { apiFetch } from '@/lib/auth';
 
@@ -24,6 +25,7 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     subject: '',
     message: '',
   });
@@ -44,7 +46,7 @@ export default function ContactPage() {
 
       if (res.success) {
         setIsSuccess(true);
-        setFormData({ name: '', email: '', subject: '', message: '' });
+        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
         setTimeout(() => setIsSuccess(false), 5000);
       } else {
         setError(res.error || 'Gagal mengirim pesan');
@@ -136,6 +138,38 @@ export default function ContactPage() {
         </motion.div>
 
         <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 backdrop-blur-sm text-center"
+        >
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-green-500/20">
+                <Phone className="w-6 h-6 text-green-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Hubungi Langsung</p>
+                <a 
+                  href="https://wa.me/6281234567890" 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="text-xl font-bold text-green-600 dark:text-green-400 hover:underline flex items-center gap-2"
+                >
+                  +62 812-3456-7890
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+            <div className="hidden sm:block w-px h-10 bg-zinc-300 dark:bg-zinc-700" />
+            <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span>Fast Response · <span className="font-medium">Chat Now</span></span>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -165,7 +199,6 @@ export default function ContactPage() {
           ))}
         </motion.div>
 
-        {/* Info Jam Operasional */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -248,6 +281,26 @@ export default function ContactPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                Nomor WhatsApp <span className="text-zinc-400 text-xs font-normal">(opsional)</span>
+              </label>
+              <div className="relative">
+                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all"
+                  placeholder="08xx-xxxx-xxxx (opsional)"
+                />
+              </div>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1.5">
+                📱 Isi jika ingin dihubungi via WhatsApp untuk respons lebih cepat
+              </p>
             </div>
 
             <div>
