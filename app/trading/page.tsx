@@ -99,74 +99,82 @@ export default function TradingPage() {
                     setError(null);
                 };
 
-                ws.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        console.log('📩 WebSocket message:', data);
+// app/trading/page.tsx — bagian useEffect WebSocket
 
-                        if (data.type === 'init') {
-                            const initData = data as InitData;
-                            setAssets(initData.assets);
-                            setBalance(initData.balance);
-                            setPortfolio(initData.portfolio || []);
-                            setLoading(false);
+ws.onmessage = (event) => {
+    try {
+        const data = JSON.parse(event.data);
+        console.log('📩 WebSocket message:', data);
 
-                            if (initData.assets.length > 0) {
-                                setSelectedAsset(initData.assets[0]);
-                            }
+        if (data.type === 'init') {
+            const initData = data as InitData;
+            setAssets(initData.assets);
+            setBalance(initData.balance);
+            setPortfolio(initData.portfolio || []);
+            setLoading(false);
 
-                            // Simpan history untuk chart
-                            if (initData.history) {
-                                const assetId = initData.assets[0]?.id;
-                                if (assetId && initData.history[assetId]) {
-                                    historyDataRef.current = initData.history[assetId].map((h: any) => ({
-                                        time: h.time as UTCTimestamp,
-                                        value: h.value,
-                                    }));
-                                }
-                            }
-                        }
+            if (initData.assets.length > 0) {
+                setSelectedAsset(initData.assets[0]);
+            }
 
-                        if (data.type === 'price_update') {
-                            setAssets(data.assets);
-                            if (selectedAsset) {
-                                const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
-                                if (updatedAsset && seriesRef.current) {
-                                    const time = Math.floor(Date.now() / 1000) as UTCTimestamp;
-                                    const newPoint = { time, value: updatedAsset.price };
-                                    historyDataRef.current.push(newPoint);
-                                    if (historyDataRef.current.length > 200) {
-                                        historyDataRef.current = historyDataRef.current.slice(-200);
-                                    }
-                                    seriesRef.current.update(newPoint);
-                                }
-                            }
-                        }
+            if (initData.history) {
+                const assetId = initData.assets[0]?.id;
+                if (assetId && initData.history[assetId]) {
+                    historyDataRef.current = initData.history[assetId].map((h: any) => ({
+                        time: h.time as UTCTimestamp,
+                        value: h.value,
+                    }));
+                }
+            }
+        }
 
-                        if (data.type === 'trade_success') {
-                            const tradeData = data as TradeSuccessData;
-                            setBalance(tradeData.balance);
-                            setPortfolio(tradeData.portfolio);
-                            setMessage({
-                                text: `✅ Berhasil ${tradeData.action === 'buy' ? 'membeli' : 'menjual'} ${tradeData.amount} ${tradeData.asset.symbol}!`,
-                                type: 'success',
-                            });
-                            setTimeout(() => setMessage(null), 4000);
-                            setIsTrading(false);
-                        }
-
-                        if (data.type === 'trade_error') {
-                            setMessage({
-                                text: data.error || 'Trade gagal!',
-                                type: 'error',
-                            });
-                            setTimeout(() => setMessage(null), 4000);
-                            setIsTrading(false);
-                        }
-                    } catch (err) {
-                        console.error('Parse error:', err);
+        // ⭐ YANG DIUBAH: PRICE UPDATE + UPDATE CHART
+        if (data.type === 'price_update') {
+            setAssets(data.assets);
+            
+            // Update chart dengan harga terbaru
+            if (selectedAsset) {
+                const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
+                if (updatedAsset && seriesRef.current) {
+                    const time = Math.floor(Date.now() / 1000) as UTCTimestamp;
+                    const newPoint = { time, value: updatedAsset.price };
+                    
+                    // Simpan ke history
+                    historyDataRef.current.push(newPoint);
+                    if (historyDataRef.current.length > 200) {
+                        historyDataRef.current = historyDataRef.current.slice(-200);
                     }
-                };
+                    
+                    // Update chart
+                    seriesRef.current.update(newPoint);
+                }
+            }
+        }
+
+        if (data.type === 'trade_success') {
+            const tradeData = data as TradeSuccessData;
+            setBalance(tradeData.balance);
+            setPortfolio(tradeData.portfolio);
+            setMessage({
+                text: `✅ Berhasil ${tradeData.action === 'buy' ? 'membeli' : 'menjual'} ${tradeData.amount} ${tradeData.asset.symbol}!`,
+                type: 'success',
+            });
+            setTimeout(() => setMessage(null), 4000);
+            setIsTrading(false);
+        }
+
+        if (data.type === 'trade_error') {
+            setMessage({
+                text: data.error || 'Trade gagal!',
+                type: 'error',
+            });
+            setTimeout(() => setMessage(null), 4000);
+            setIsTrading(false);
+        }
+    } catch (err) {
+        console.error('Parse error:', err);
+    }
+};
 
                 ws.onclose = () => {
                     console.log('❌ WebSocket disconnected');
