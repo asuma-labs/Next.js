@@ -91,8 +91,8 @@ export default function TradingPage() {
     const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
-    const candleSeriesRef = useRef<ReturnType<typeof chartRef.current extends null ? never : chartRef.current.addSeries> | null>(null);
-    const volumeSeriesRef = useRef<ReturnType<typeof chartRef.current extends null ? never : chartRef.current.addSeries> | null>(null);
+    const candleSeriesRef = useRef<any>(null);
+    const volumeSeriesRef = useRef<any>(null);  
     const selectedAssetRef = useRef<Asset | null>(null);
     const candleDataRef = useRef<any[]>([]);
     const hasRealDataRef = useRef<boolean>(false);
