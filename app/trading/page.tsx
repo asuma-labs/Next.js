@@ -476,48 +476,68 @@ export default function TradingPage() {
         }
     };
 
-    const handleTrade = () => {
-        if (isGuest) {
-            setMessage({ text: 'Login terlebih dahulu untuk trading', type: 'error' });
-            setTimeout(() => setMessage(null), 4000);
-            return;
-        }
-        if (!selectedAsset || !tradeAmount) {
-            setMessage({ text: 'Pilih aset dan masukkan jumlah', type: 'error' });
-            setTimeout(() => setMessage(null), 4000);
-            return;
-        }
-        const amount = parseFloat(tradeAmount);
-        if (isNaN(amount) || amount <= 0) {
-            setMessage({ text: 'Masukkan jumlah yang valid', type: 'error' });            setTimeout(() => setMessage(null), 4000);
-            return;
-        }
-        if (orderType === 'limit' && (!limitPrice || parseFloat(limitPrice) <= 0)) {
-            setMessage({ text: 'Masukkan harga limit yang valid', type: 'error' });
-            setTimeout(() => setMessage(null), 4000);
-            return;
-        }
+const handleTrade = () => {
+    if (isGuest) {
+        setMessage({ text: 'Login terlebih dahulu untuk trading', type: 'error' });
+        setTimeout(() => setMessage(null), 4000);
+        return;
+    }
+    if (!selectedAsset || !tradeAmount) {
+        setMessage({ text: 'Pilih aset dan masukkan jumlah', type: 'error' });
+        setTimeout(() => setMessage(null), 4000);
+        return;
+    }
+    const amount = parseFloat(tradeAmount);
+    if (isNaN(amount) || amount <= 0) {
+        setMessage({ text: 'Masukkan jumlah yang valid', type: 'error' });
+        setTimeout(() => setMessage(null), 4000);
+        return;
+    }
+    if (orderType === 'limit' && (!limitPrice || parseFloat(limitPrice) <= 0)) {
+        setMessage({ text: 'Masukkan harga limit yang valid', type: 'error' });
+        setTimeout(() => setMessage(null), 4000);
+        return;
+    }
 
-        setIsTrading(true);
+    setIsTrading(true);
 
-        const ws = wsRef.current;
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
-                action: 'trade',
-                assetId: selectedAsset.id,
-                side: isBuying ? 'buy' : 'sell',
-                type: orderType,
-                price: orderType === 'limit' ? parseFloat(limitPrice) : undefined,
-                amount: amount,
-            }));
-        } else {
-            setMessage({ text: 'Koneksi WebSocket belum siap', type: 'error' });
-            setTimeout(() => setMessage(null), 4000);
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        const tradeMessage = {
+            action: 'trade',
+            assetId: selectedAsset.id,
+            side: isBuying ? 'buy' : 'sell',
+            type: orderType,
+            price: orderType === 'limit' ? parseFloat(limitPrice) : undefined,
+            amount: amount,
+        };
+        
+        ws.send(JSON.stringify(tradeMessage));
+        
+        // Timeout setelah 10 detik
+        const timeoutId = setTimeout(() => {
             setIsTrading(false);
-        }
+            setMessage({ 
+                text: 'Request timeout. Silakan coba lagi atau refresh halaman.', 
+                type: 'error' 
+            });
+            setTimeout(() => setMessage(null), 5000);
+        }, 10000);
+        
+        // Cleanup timeout ketika ada response
+        const messageHandler = () => {
+            clearTimeout(timeoutId);
+            ws?.removeEventListener('message', messageHandler);
+        };
+        ws.addEventListener('message', messageHandler);
+    } else {
+        setIsTrading(false);
+        setMessage({ text: 'Koneksi WebSocket belum siap', type: 'error' });
+        setTimeout(() => setMessage(null), 4000);
+    }
 
-        setTradeAmount('');
-    };
+    setTradeAmount('');
+};
 
     const cancelOrder = (id: string) => {
         setOpenOrders(prev => prev.filter(o => o.id !== id));
