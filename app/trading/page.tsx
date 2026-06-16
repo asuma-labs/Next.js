@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -91,18 +90,16 @@ export default function TradingPage() {
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
-    const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
+    const chartRef = useRef<any>(null);
     const candleSeriesRef = useRef<any>(null);
-    const volumeSeriesRef = useRef<any>(null);  
+    const volumeSeriesRef = useRef<any>(null);
     const selectedAssetRef = useRef<Asset | null>(null);
     const candleDataRef = useRef<any[]>([]);
     const hasRealDataRef = useRef<boolean>(false);
-    // Sync ref with state
     useEffect(() => {
         selectedAssetRef.current = selectedAsset;
     }, [selectedAsset]);
 
-    // Auth check
     useEffect(() => {
         try {
             const t = getToken();
@@ -125,14 +122,12 @@ export default function TradingPage() {
         }
     }, []);
 
-    // Update limit price when selected asset changes
     useEffect(() => {
         if (selectedAsset) {
             setLimitPrice(selectedAsset.price.toString());
         }
     }, [selectedAsset]);
 
-    // WebSocket connection
     useEffect(() => {
         if (!token || isGuest) return;
 
@@ -146,10 +141,10 @@ export default function TradingPage() {
                     setConnected(true);
                     setError(null);
                 };
+
                 ws.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
-
                         if (data.type === 'init') {
                             const assetsData = data.assets || [];
                             setAssets(assetsData);
@@ -160,7 +155,7 @@ export default function TradingPage() {
                             if (assetsData.length > 0) {
                                 const firstAsset = assetsData[0];
                                 setSelectedAsset(firstAsset);
-
+                                
                                 if (data.marketData && data.marketData[firstAsset.id]) {
                                     const marketData = data.marketData[firstAsset.id];
                                     if (marketData.history && marketData.history.length > 0) {
@@ -181,29 +176,36 @@ export default function TradingPage() {
                         if (data.type === 'order_book_update') {
                             if (data.assetId && data.depth) {
                                 const newPrice = data.depth.lastPrice;
-                                setAssets(prev => prev.map(asset =>
-                                    asset.id === data.assetId
-                                        ? { ...asset, price: newPrice || asset.price, volume24h: data.depth.volume24h || asset.volume24h }
-                                        : asset
-                                ));
+                                if (newPrice) {
+                                    setAssets(prev => prev.map(asset =>
+                                        asset.id === data.assetId
+                                            ? { ...asset, price: newPrice, volume24h: data.depth.volume24h || asset.volume24h }
+                                            : asset
+                                    ));
 
-                                const currentSelected = selectedAssetRef.current;
-                                if (currentSelected?.id === data.assetId && newPrice) {
-                                    setSelectedAsset(prev => prev ? { ...prev, price: newPrice } : null);
+                                    const currentSelected = selectedAssetRef.current;
+                                    if (currentSelected?.id === data.assetId) {
+                                        setSelectedAsset(prev => prev ? {
+                                            ...prev,
+                                            price: newPrice,
+                                            high24h: Math.max(prev.high24h || newPrice, newPrice),
+                                            low24h: Math.min(prev.low24h || newPrice, newPrice),
+                                        } : null);
+                                    }
                                 }
                             }
                         }
-
                         if (data.type === 'new_trade') {
-                            if (data.trades && data.trades.length > 0) {                                const newTrades: TradeHistory[] = data.trades.map((t: any) => ({
-                                    id: t.id,
+                            if (data.trades && data.trades.length > 0) {
+                                const newTrades: TradeHistory[] = data.trades.map((t: any) => ({
+                                    id: t.id || Math.random().toString(36).substr(2, 9),
                                     price: t.price,
                                     amount: t.amount,
-                                    time: new Date(t.timestamp).toLocaleTimeString('id-ID'),
+                                    time: new Date(t.timestamp || Date.now()).toLocaleTimeString('id-ID'),
                                     side: t.takerSide,
                                 }));
                                 setLastTrades(prev => [...newTrades, ...prev].slice(0, 15));
-
+                                
                                 const lastTrade = data.trades[data.trades.length - 1];
                                 if (data.assetId && lastTrade) {
                                     setAssets(prev => prev.map(asset =>
@@ -222,29 +224,37 @@ export default function TradingPage() {
 
                         if (data.type === 'trade_executed') {
                             setMessage({
-                                text: `Order ${data.trade?.takerSide === 'buy' ? 'beli' : 'jual'} berhasil!`,
+                                text: `Order ${data.trade?.takerSide === 'buy' ? 'beli' : 'jual'} berhasil dieksekusi!`,
                                 type: 'success',
                             });
                             setTimeout(() => setMessage(null), 4000);
                             setIsTrading(false);
-
+                            
                             if (data.portfolio) setPortfolio(data.portfolio);
                             if (data.balance !== undefined) setBalance(data.balance);
                         }
 
-                        if (data.type === 'order_placed' && data.order) {
-                            const newOrder: OpenOrder = {
-                                id: data.order.id,
-                                symbol: (data.order.assetId || '').toUpperCase(),
-                                side: data.order.side,
-                                type: data.order.type,
-                                price: data.order.price,
-                                amount: data.order.amount,
-                                total: data.order.price * data.order.amount,
-                                time: new Date(data.order.createdAt).toLocaleTimeString('id-ID'),
-                            };
-                            setOpenOrders(prev => [newOrder, ...prev]);
-                            setMessage({ text: 'Order limit berhasil dibuat', type: 'success' });                            setTimeout(() => setMessage(null), 4000);
+                        if (data.type === 'order_placed') {
+                            if (data.order) {
+                                const newOrder: OpenOrder = {
+                                    id: data.order.id,
+                                    symbol: (data.order.assetId || '').toUpperCase(),
+                                    side: data.order.side,
+                                    type: data.order.type,
+                                    price: data.order.price,
+                                    amount: data.order.amount,
+                                    total: data.order.price * data.order.amount,                                    time: new Date(data.order.createdAt || Date.now()).toLocaleTimeString('id-ID'),
+                                };
+                                setOpenOrders(prev => [newOrder, ...prev]);
+                            }
+                            setMessage({ text: 'Order limit berhasil dibuat', type: 'success' });
+                            setTimeout(() => setMessage(null), 4000);
+                            setIsTrading(false);
+                        }
+
+                        if (data.type === 'trade_error') {
+                            setMessage({ text: data.error || 'Trading gagal', type: 'error' });
+                            setTimeout(() => setMessage(null), 4000);
                             setIsTrading(false);
                         }
                     } catch (err) {
@@ -282,18 +292,16 @@ export default function TradingPage() {
             }
         };
     }, [token, isGuest]);
-
-    // Chart initialization and update
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
-        // Cleanup existing chart
         if (chartRef.current) {
             try {
                 chartRef.current.remove();
             } catch (err) {
                 console.error('Chart remove error:', err);
-            }            chartRef.current = null;
+            }
+            chartRef.current = null;
             candleSeriesRef.current = null;
             volumeSeriesRef.current = null;
         }
@@ -326,7 +334,6 @@ export default function TradingPage() {
         });
         candleSeriesRef.current = candleSeries;
 
-        // Fix untuk v5: gunakan custom priceScaleId untuk volume overlay
         const volumeSeries = chart.addSeries(HistogramSeries, {
             priceFormat: { type: 'volume' },
             priceScaleId: 'volume',
@@ -335,14 +342,13 @@ export default function TradingPage() {
         chart.priceScale('volume').applyOptions({
             scaleMargins: { top: 0.8, bottom: 0 },
         });
-
         volumeSeriesRef.current = volumeSeries;
 
-        // Use real data if available, otherwise generate mock
         if (candleDataRef.current.length > 0) {
             try {
                 candleSeries.setData(candleDataRef.current);
-            } catch (err) {                console.error('Set candle data error:', err);
+            } catch (err) {
+                console.error('Set candle data error:', err);
             }
         } else {
             const now = new Date();
@@ -384,14 +390,14 @@ export default function TradingPage() {
                 try {
                     chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
                 } catch (err) {
-                    console.error('Resize error:', err);
-                }
+                    console.error('Resize error:', err);                }
             }
         };
 
         window.addEventListener('resize', handleResize);
 
-        return () => {            window.removeEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
             if (chartRef.current) {
                 try {
                     chartRef.current.remove();
@@ -403,9 +409,8 @@ export default function TradingPage() {
                 volumeSeriesRef.current = null;
             }
         };
-    }, [selectedAsset?.id, timeframe]); // Pakai selectedAsset.id aja biar ga re-render berlebihan
+    }, [selectedAsset?.id, timeframe]);
 
-    // Live chart updates
     useEffect(() => {
         if (!candleSeriesRef.current || !volumeSeriesRef.current || !selectedAsset) return;
 
@@ -434,36 +439,17 @@ export default function TradingPage() {
                         time: now,
                         value: Math.random() * 100,
                         color: price >= newCandle.open ? 'rgba(14, 203, 129, 0.5)' : 'rgba(246, 70, 93, 0.5)',
-                    });
-                } else {
+                    });                } else {
                     candles[candles.length - 1] = updatedCandle;
                     candleSeriesRef.current?.update(updatedCandle);
                 }
             } catch (err) {
-                console.error('Chart update error:', err);            }
+                console.error('Chart update error:', err);
+            }
         };
 
         updateData(selectedAsset.price);
-    }, [selectedAsset?.price]); // Cuma listen ke price-nya aja
-
-    // Simulated trades for connected users
-    useEffect(() => {
-        if (!isGuest && connected && selectedAsset) {
-            const interval = setInterval(() => {
-                const currentAsset = selectedAssetRef.current;
-                const newTrade: TradeHistory = {
-                    id: Math.random().toString(36).substr(2, 9),
-                    price: currentAsset?.price || 0,
-                    amount: parseFloat((Math.random() * 0.5).toFixed(4)),
-                    time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-                    side: Math.random() > 0.5 ? 'buy' : 'sell',
-                };
-                setLastTrades(prev => [newTrade, ...prev].slice(0, 15));
-            }, 3000);
-
-            return () => clearInterval(interval);
-        }
-    }, [selectedAsset?.id, isGuest, connected]);
+    }, [selectedAsset?.price]);
 
     const handlePercentClick = (pct: number) => {
         if (!selectedAsset) return;
@@ -476,68 +462,82 @@ export default function TradingPage() {
         }
     };
 
-const handleTrade = () => {
-    if (isGuest) {
-        setMessage({ text: 'Login terlebih dahulu untuk trading', type: 'error' });
-        setTimeout(() => setMessage(null), 4000);
-        return;
-    }
-    if (!selectedAsset || !tradeAmount) {
-        setMessage({ text: 'Pilih aset dan masukkan jumlah', type: 'error' });
-        setTimeout(() => setMessage(null), 4000);
-        return;
-    }
-    const amount = parseFloat(tradeAmount);
-    if (isNaN(amount) || amount <= 0) {
-        setMessage({ text: 'Masukkan jumlah yang valid', type: 'error' });
-        setTimeout(() => setMessage(null), 4000);
-        return;
-    }
-    if (orderType === 'limit' && (!limitPrice || parseFloat(limitPrice) <= 0)) {
-        setMessage({ text: 'Masukkan harga limit yang valid', type: 'error' });
-        setTimeout(() => setMessage(null), 4000);
-        return;
-    }
+    const handleTrade = async () => {
+        if (isGuest) {
+            setMessage({ text: 'Login terlebih dahulu untuk trading', type: 'error' });
+            setTimeout(() => setMessage(null), 4000);
+            return;
+        }
+        if (!selectedAsset || !tradeAmount) {
+            setMessage({ text: 'Pilih aset dan masukkan jumlah', type: 'error' });
+            setTimeout(() => setMessage(null), 4000);
+            return;
+        }
+        const amount = parseFloat(tradeAmount);
+        if (isNaN(amount) || amount <= 0) {
+            setMessage({ text: 'Masukkan jumlah yang valid', type: 'error' });
+            setTimeout(() => setMessage(null), 4000);
+            return;
+        }
+        if (orderType === 'limit' && (!limitPrice || parseFloat(limitPrice) <= 0)) {
+            setMessage({ text: 'Masukkan harga limit yang valid', type: 'error' });
+            setTimeout(() => setMessage(null), 4000);
+            return;
+        }
 
-    setIsTrading(true);
+        setIsTrading(true);
 
-    const ws = wsRef.current;
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        const tradeMessage = {
-            action: 'trade',
-            assetId: selectedAsset.id,
-            side: isBuying ? 'buy' : 'sell',
-            type: orderType,
-            price: orderType === 'limit' ? parseFloat(limitPrice) : undefined,
-            amount: amount,
-        };
-        
-        ws.send(JSON.stringify(tradeMessage));
-        
-        // Timeout setelah 10 detik
-        const timeoutId = setTimeout(() => {
+        const ws = wsRef.current;
+        let timeoutId: ReturnType<typeof setTimeout>;        
+        timeoutId = setTimeout(() => {
             setIsTrading(false);
             setMessage({ 
-                text: 'Request timeout. Silakan coba lagi atau refresh halaman.', 
+                text: 'Request timeout. Periksa koneksi atau coba lagi.', 
                 type: 'error' 
             });
             setTimeout(() => setMessage(null), 5000);
-        }, 10000);
-        
-        // Cleanup timeout ketika ada response
-        const messageHandler = () => {
-            clearTimeout(timeoutId);
-            ws?.removeEventListener('message', messageHandler);
-        };
-        ws.addEventListener('message', messageHandler);
-    } else {
-        setIsTrading(false);
-        setMessage({ text: 'Koneksi WebSocket belum siap', type: 'error' });
-        setTimeout(() => setMessage(null), 4000);
-    }
+        }, 15000);
 
-    setTradeAmount('');
-};
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            const tradeMessage = {
+                type: 'trade',
+                assetId: selectedAsset.id,
+                side: isBuying ? 'buy' : 'sell',
+                type: orderType,
+                price: orderType === 'limit' ? parseFloat(limitPrice) : undefined,
+                amount: amount,
+            };
+            
+            try {
+                ws.send(JSON.stringify(tradeMessage));
+                
+                const originalHandler = ws.onmessage;
+                ws.onmessage = (event) => {
+                    if (originalHandler) originalHandler(event);
+                    
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (['trade_executed', 'order_placed', 'trade_error'].includes(data.type)) {
+                            clearTimeout(timeoutId);
+                        }
+                    } catch (err) {
+                        console.error('Message handler error:', err);
+                    }
+                };
+            } catch (err) {
+                clearTimeout(timeoutId);
+                setIsTrading(false);
+                setMessage({ text: 'Gagal mengirim order', type: 'error' });
+                setTimeout(() => setMessage(null), 4000);
+            }
+        } else {
+            clearTimeout(timeoutId);
+            setIsTrading(false);
+            setMessage({ text: 'Koneksi WebSocket belum siap', type: 'error' });
+            setTimeout(() => setMessage(null), 4000);
+        }
+
+        setTradeAmount('');    };
 
     const cancelOrder = (id: string) => {
         setOpenOrders(prev => prev.filter(o => o.id !== id));
@@ -558,7 +558,8 @@ const handleTrade = () => {
             case 'btc': return 'text-orange-500';
             case 'eth': return 'text-indigo-500';
             case 'sbn': return 'text-emerald-500';
-            case 'gauge': return 'text-purple-500';            default: return 'text-zinc-500';
+            case 'gauge': return 'text-purple-500';
+            default: return 'text-zinc-500';
         }
     };
 
@@ -580,14 +581,12 @@ const handleTrade = () => {
 
     return (
         <div className="min-h-screen bg-zinc-50 dark:bg-[#0B0E11] text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
-            {/* Message Toast */}
             {message && (
                 <div className={`fixed top-20 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ${
                     message.type === 'success' ? 'bg-[#0ecb81] text-white' : 'bg-[#f6465d] text-white'
                 }`}>
                     {message.text}
-                </div>
-            )}
+                </div>            )}
 
             <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#181A20] px-4 py-3 flex items-center justify-between sticky top-0 z-30">
                 <div className="flex items-center gap-4">
@@ -607,7 +606,8 @@ const handleTrade = () => {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    {isGuest ? (                        <button onClick={() => router.push('/login')} className="px-4 py-2 bg-cyan-500 text-white text-sm font-semibold rounded-lg hover:bg-cyan-600 transition-colors flex items-center gap-2">
+                    {isGuest ? (
+                        <button onClick={() => router.push('/login')} className="px-4 py-2 bg-cyan-500 text-white text-sm font-semibold rounded-lg hover:bg-cyan-600 transition-colors flex items-center gap-2">
                             <LogIn className="w-4 h-4" /> Login
                         </button>
                     ) : (
@@ -635,8 +635,7 @@ const handleTrade = () => {
                                 </div>
                             </div>
                             <div className="flex gap-6 text-xs">
-                                <div><span className="text-zinc-500 block">24h High</span><span className="font-semibold">Rp {formatPrice(selectedAsset?.high24h)}</span></div>
-                                <div><span className="text-zinc-500 block">24h Low</span><span className="font-semibold">Rp {formatPrice(selectedAsset?.low24h)}</span></div>
+                                <div><span className="text-zinc-500 block">24h High</span><span className="font-semibold">Rp {formatPrice(selectedAsset?.high24h)}</span></div>                                <div><span className="text-zinc-500 block">24h Low</span><span className="font-semibold">Rp {formatPrice(selectedAsset?.low24h)}</span></div>
                                 <div><span className="text-zinc-500 block">24h Volume</span><span className="font-semibold">{selectedAsset ? (selectedAsset.volume24h / 1000000).toFixed(1) + 'M' : '0'}</span></div>
                             </div>
                             <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
@@ -656,7 +655,8 @@ const handleTrade = () => {
                         <div ref={chartContainerRef} className="w-full h-[400px] rounded-lg overflow-hidden" />
                     </div>
 
-                    {!isGuest && (                        <div className="bg-white dark:bg-[#181A20] rounded-xl border border-zinc-200 dark:border-zinc-800 p-4">
+                    {!isGuest && (
+                        <div className="bg-white dark:bg-[#181A20] rounded-xl border border-zinc-200 dark:border-zinc-800 p-4">
                             <div className="flex gap-4 mb-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
                                 <button onClick={() => setIsBuying(true)} className={`flex-1 py-2 text-center font-bold rounded-lg transition-all ${isBuying ? 'bg-[#0ecb81]/10 text-[#0ecb81]' : 'text-zinc-500'}`}>Beli</button>
                                 <button onClick={() => setIsBuying(false)} className={`flex-1 py-2 text-center font-bold rounded-lg transition-all ${!isBuying ? 'bg-[#f6465d]/10 text-[#f6465d]' : 'text-zinc-500'}`}>Jual</button>
@@ -684,8 +684,7 @@ const handleTrade = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-lg p-3 space-y-2 text-sm">
-                                    <div className="flex justify-between"><span className="text-zinc-500">Estimasi Total</span><span className="font-medium">Rp {estimatedTotal.toLocaleString('id-ID')}</span></div>
+                                <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-lg p-3 space-y-2 text-sm">                                    <div className="flex justify-between"><span className="text-zinc-500">Estimasi Total</span><span className="font-medium">Rp {estimatedTotal.toLocaleString('id-ID')}</span></div>
                                     <div className="flex justify-between"><span className="text-zinc-500">Fee (0.1%)</span><span className="font-medium">Rp {fee.toLocaleString('id-ID')}</span></div>
                                     <div className="flex justify-between border-t border-zinc-200 dark:border-zinc-800 pt-2">
                                         <span className="text-zinc-500">{isBuying ? 'Diterima' : 'Total Diterima (IDR)'}</span>
@@ -705,7 +704,8 @@ const handleTrade = () => {
                     {isGuest && (
                         <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-6 text-center">
                             <p className="text-cyan-600 dark:text-cyan-400 font-bold mb-2">Mode Tamu Aktif</p>
-                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">Login untuk mengakses fitur trading, portofolio, dan riwayat transaksi.</p>                            <button onClick={() => router.push('/login')} className="px-6 py-2.5 bg-cyan-500 text-white font-semibold rounded-lg hover:bg-cyan-600 transition-colors inline-flex items-center gap-2">
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">Login untuk mengakses fitur trading, portofolio, dan riwayat transaksi.</p>
+                            <button onClick={() => router.push('/login')} className="px-6 py-2.5 bg-cyan-500 text-white font-semibold rounded-lg hover:bg-cyan-600 transition-colors inline-flex items-center gap-2">
                                 <LogIn className="w-4 h-4" /> Login Sekarang
                             </button>
                         </div>
@@ -733,8 +733,7 @@ const handleTrade = () => {
                                                             <div className="font-medium">{order.symbol} <span className="text-zinc-500 text-xs">Limit</span></div>
                                                             <div className="text-xs text-zinc-500">{order.time}</div>
                                                         </div>
-                                                    </div>
-                                                    <div className="text-right">
+                                                    </div>                                                    <div className="text-right">
                                                         <div className="font-medium">{order.amount} @ Rp {order.price.toLocaleString('id-ID')}</div>
                                                         <div className="text-xs text-zinc-500">Total: Rp {order.total.toLocaleString('id-ID')}</div>
                                                     </div>
@@ -754,7 +753,8 @@ const handleTrade = () => {
 
                 <div className="lg:col-span-3 space-y-4">
                     <div className="bg-white dark:bg-[#181A20] rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                        <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex justify-between text-xs font-semibold text-zinc-500">                            <span>Harga</span><span>Jumlah</span>
+                        <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex justify-between text-xs font-semibold text-zinc-500">
+                            <span>Harga</span><span>Jumlah</span>
                         </div>
                         <div className="max-h-[180px] overflow-y-auto">
                             {Array.from({ length: 8 }).map((_, i) => {
@@ -782,8 +782,7 @@ const handleTrade = () => {
                                     <div key={`bid-${i}`} className="flex justify-between px-3 py-1 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer relative">
                                         <div className="absolute right-0 top-0 bottom-0 bg-[#0ecb81]/10" style={{ width: `${Math.random() * 60 + 10}%` }} />
                                         <span className="text-[#0ecb81] relative z-10">{formatPrice(price)}</span>
-                                        <span className="text-zinc-600 dark:text-zinc-400 relative z-10">{(Math.random() * 2).toFixed(4)}</span>
-                                    </div>
+                                        <span className="text-zinc-600 dark:text-zinc-400 relative z-10">{(Math.random() * 2).toFixed(4)}</span>                                    </div>
                                 );
                             })}
                         </div>
@@ -803,7 +802,8 @@ const handleTrade = () => {
                                         <span className="text-zinc-600 dark:text-zinc-400">{trade.amount}</span>
                                         <span className="text-zinc-500">{trade.time}</span>
                                     </div>
-                                ))                            )}
+                                ))
+                            )}
                         </div>
                     </div>
 
@@ -831,8 +831,7 @@ const handleTrade = () => {
                                                 <div className={`text-xs font-medium ${pnl >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
                                                     {pnl >= 0 ? '+' : ''}{pnlPercent.toFixed(2)}% (Rp {pnl.toLocaleString('id-ID')})
                                                 </div>
-                                            </div>
-                                            <span className="font-medium text-sm">Rp {currentValue.toLocaleString('id-ID')}</span>
+                                            </div>                                            <span className="font-medium text-sm">Rp {currentValue.toLocaleString('id-ID')}</span>
                                         </div>
                                     );
                                 })}
