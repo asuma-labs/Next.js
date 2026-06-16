@@ -1,4 +1,3 @@
-// app/trading/page.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -65,7 +64,7 @@ export default function TradingPage() {
     const [isTrading, setIsTrading] = useState(false);
 
     const wsRef = useRef<WebSocket | null>(null);
-    const reconnectTimeout = useRef<NodeJS.Timeout>();
+    const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const t = getToken();
@@ -135,6 +134,9 @@ export default function TradingPage() {
                 ws.onclose = () => {
                     console.log('❌ WebSocket disconnected');
                     setConnected(false);
+                    if (reconnectTimeout.current) {
+                        clearTimeout(reconnectTimeout.current);
+                    }
                     reconnectTimeout.current = setTimeout(connectWebSocket, 3000);
                 };
 
