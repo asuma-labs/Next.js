@@ -500,13 +500,13 @@ export default function TradingPage() {
 
         if (ws && ws.readyState === WebSocket.OPEN) {
             const tradeMessage = {
-                type: 'trade',
-                assetId: selectedAsset.id,
-                side: isBuying ? 'buy' : 'sell',
-                type: orderType,
-                price: orderType === 'limit' ? parseFloat(limitPrice) : undefined,
-                amount: amount,
-            };
+    action: 'trade',
+    assetId: selectedAsset.id,
+    side: isBuying ? 'buy' : 'sell',
+    type: orderType,             
+    price: orderType === 'limit' ? parseFloat(limitPrice) : undefined,
+    amount: amount,
+};
             
             try {
                 ws.send(JSON.stringify(tradeMessage));
