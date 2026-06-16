@@ -1,22 +1,9 @@
 // app/about/page.tsx
-import type { Metadata } from "next";
+'use client';
+
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { ArrowRight, Bot, Code2, ArrowLeft } from 'lucide-react';
-
-// ✅ METADATA KHUSUS ABOUT
-export const metadata: Metadata = {
-  title: "About - Asuma Bot",
-  description: "Pelajari lebih lanjut tentang Asuma Bot, developer Ditss, dan fitur-fitur yang tersedia.",
-  openGraph: {
-    title: "About - Asuma Bot",
-    description: "Pelajari lebih lanjut tentang Asuma Bot, developer Ditss, dan fitur-fitur yang tersedia.",
-    url: "https://asuma.my.id/about",
-  },
-  alternates: {
-    canonical: "https://asuma.my.id/about",
-  },
-};
 
 export default function AboutPage() {
   const containerVariants = {
