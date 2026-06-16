@@ -1,113 +1,83 @@
-import { notFound } from 'next/navigation';
-import { cookies } from 'next/headers';
-import type { Metadata } from 'next';
-import { API_URL, SITE_URL } from '@/lib/config';
-import PrivateDashboard from './PrivateDashboard';
-import PublicProfile from './PublicProfile';
+// app/[username]/page.tsx
+'use client';
 
-export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
-  const { username } = await params;
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import { getToken, apiFetch } from '@/lib/auth';
+import DashboardView from './_components/DashboardView';
+import PublicProfileView from './_components/PublicProfileView';
+
+export default function UserPage() {
+  const params = useParams<{ username: string }>();
+  const router = useRouter();
   
-  try {
-    const res = await fetch(`${API_URL}/api/profile/${username}`, { next: { revalidate: 60 } });
-    if (!res.ok) return { title: 'Not Found' };
-    
-    const json = await res.json();
-    if (!json.success || !json.data) return { title: 'Not Found' };
-    
-    const profile = json.data.profile;
-    const title = `${profile.name} • Asuma`;
-    const description = profile.bio || `View ${profile.name}'s profile on Asuma.`;
+  const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+  const [error, setError] = useState('');
 
-    return {
-      title,
-      description,
-      openGraph: {
-        title,
-        description,
-        url: `${SITE_URL}/${username}`,
-        siteName: 'Asuma Bot',
-      },
-      twitter: {
-        card: 'summary',
-        title,
-        description,
-      },
-      alternates: {
-        canonical: `${SITE_URL}/${username}`,
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = getToken();
+      const username = params.username;
+
+      try {
+        const publicRes = await fetch(`https://bot.asuma.my.id/api/profile/${username}`);
+        if (!publicRes.ok) throw new Error('User not found');
+        const publicData = await publicRes.json();
+
+        if (token) {
+          const privateRes = await apiFetch('/api/dashboard/me');
+          if (privateRes.success && privateRes.data?.profile?.name === username) {
+            setIsOwner(true);
+            setUserData(privateRes.data);
+            setLoading(false);
+            return;
+          }
+        }
+
+        setIsOwner(false);
+        setUserData(publicData.data);
+      } catch (err) {
+        setError('User tidak ditemukan atau terjadi kesalahan');
+      } finally {
+        setLoading(false);
       }
     };
-  } catch (error) {
-    return { title: `${username} • Asuma` };
-  }
-}
 
-export default async function ProfileRoute({ params }: { params: Promise<{ username: string }> }) {
-  const { username } = await params;
-  
-  const cookieStore = await cookies();
-  const token = cookieStore.get('asuma_token')?.value;
-  
-  let isOwner = false;
-  let privateData = null;
+    fetchData();
+  }, [params.username]);
 
-  if (token) {
-    try {
-      const dbRes = await fetch(`${API_URL}/api/dashboard/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        cache: 'no-store'
-      });
-      
-      if (dbRes.ok) {
-        const dbJson = await dbRes.json();
-        if (dbJson.success && dbJson.data?.profile?.name?.toLowerCase() === username.toLowerCase()) {
-          isOwner = true;
-          privateData = dbJson.data;
-        }
-      }
-    } catch (e) {
-      // Ignore
-    }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
+      </div>
+    );
   }
 
-  if (isOwner && privateData) {
-    return <PrivateDashboard userData={privateData} />;
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <p className="text-red-500 font-medium">{error}</p>
+        <button 
+          onClick={() => router.push('/')}
+          className="px-6 py-2.5 bg-zinc-900 text-white font-medium rounded-xl"
+        >
+          Kembali ke Beranda
+        </button>
+      </div>
+    );
   }
 
-  // Fallback to Public Profile
-  let publicData = null;
-  let hasError = false;
-  let is404 = false;
-
-  try {
-    const pubRes = await fetch(`${API_URL}/api/profile/${username}`, { cache: 'no-store' });
-    if (!pubRes.ok) {
-      if (pubRes.status === 404) {
-        is404 = true;
-      } else {
-        hasError = true;
-      }
-    } else {
-      const pubJson = await pubRes.json();
-      if (!pubJson.success || !pubJson.data) {
-        is404 = true;
-      } else {
-        publicData = pubJson.data;
-      }
-    }
-  } catch (e) {
-    hasError = true;
-  }
-
-  if (is404) {
-    return notFound();
-  }
-
-  if (hasError) {
-    return <div className="p-8 text-red-500">Failed to load profile.</div>;
-  }
-
-  return <PublicProfile publicData={publicData} username={username} />;
+  return (
+    <div className="max-w-5xl mx-auto space-y-8 w-full pb-20 px-4">
+      {isOwner ? (
+        <DashboardView userData={userData} />
+      ) : (
+        <PublicProfileView userData={userData} />
+      )}
+    </div>
+  );
 }
