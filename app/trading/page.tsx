@@ -18,7 +18,7 @@ import {
     Loader2,
 } from 'lucide-react';
 import { getToken } from '@/lib/auth';
-import { createChart, ColorType, CrosshairMode, AreaSeries } from 'lightweight-charts';
+import { createChart, ColorType, CrosshairMode, AreaSeries, UTCTimestamp } from 'lightweight-charts';
 
 interface Asset {
     id: string;
@@ -111,9 +111,9 @@ export default function TradingPage() {
                             if (selectedAsset) {
                                 const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
                                 if (updatedAsset && seriesRef.current) {
-                                    const time = new Date();
+                                    const time = Math.floor(Date.now() / 1000) as UTCTimestamp;
                                     seriesRef.current.update({
-                                        time: Math.floor(time.getTime() / 1000),
+                                        time: time,
                                         value: updatedAsset.price,
                                     });
                                 }
@@ -221,7 +221,7 @@ export default function TradingPage() {
             const basePrice = selectedAsset.price || 965000;
             const randomChange = (Math.random() - 0.5) * 1000;
             data.push({
-                time: Math.floor(time.getTime() / 1000),
+                time: Math.floor(time.getTime() / 1000) as UTCTimestamp,
                 value: Math.max(basePrice + randomChange, 100),
             });
         }
