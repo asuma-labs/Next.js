@@ -1,99 +1,72 @@
-// app/[username]/_components/PublicProfileView.tsx
-'use client';
+"use client";
 
-import { User, Crown, Trophy, Users, Calendar } from 'lucide-react';
-import { motion } from 'motion/react';
+import { User, Users, Trophy, Wallet, Gamepad2 } from "lucide-react";
 
-interface PublicProfileViewProps {
-  userData: {
-    profile: {
-      name: string;
-      bio: string;
-      vip: boolean;
-      profilePic: string | null;
-      banner: string | null;
-      profileViews: number;
-    };
-    economy: {
-      level: number;
-      exp: number;
-    };
-    games: {
-      rpgWins: number;
-      dungeonWins: number;
-      casinoWins: number;
-    };
-    social: {
-      followers: number;
-      following: number;
-    };
-  };
-}
-
-export default function PublicProfileView({ userData }: PublicProfileViewProps) {
+export default function PublicProfileView({ userData }: { userData: any }) {
   const { profile, economy, games, social } = userData;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
-    >
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-6 border-b border-zinc-200 dark:border-zinc-800 pb-6">
-        <div className="p-4 rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700">
-          <User className="w-12 h-12 text-zinc-600 dark:text-zinc-300" />
-        </div>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            {profile.name}
-            {profile.vip && (
-              <Crown className="w-5 h-5 text-amber-500" />
-            )}
-          </h1>
-          <p className="text-zinc-500 text-sm mt-1">
-            {profile.bio || 'Player Asuma MD'}
-          </p>
-          <div className="flex items-center gap-4 mt-2 text-sm text-zinc-400">
-            <span className="flex items-center gap-1">
-              <Users className="w-4 h-4" />
-              {social.followers} followers
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              {profile.profileViews || 0} views
-            </span>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header Card */}
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10" />
+        
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+            {profile.name.charAt(0)}
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              {profile.name}
+              {profile.vip && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30">VIP</span>}
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">{profile.bio || "Player Asuma MD"}</p>
           </div>
         </div>
-        {profile.vip && (
-          <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-700 dark:text-amber-400 text-sm font-semibold border border-amber-500/20">
-            <Crown className="w-4 h-4" /> Premium
-          </div>
-        )}
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-center">
-          <h3 className="text-sm font-medium text-zinc-500">Level</h3>
-          <p className="mt-2 text-3xl font-bold">{economy.level || 1}</p>
-          <p className="text-xs text-zinc-400 mt-1">Exp: {economy.exp || 0}</p>
-        </div>
-        <div className="p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-center">
-          <h3 className="text-sm font-medium text-zinc-500">RPG Wins</h3>
-          <p className="mt-2 text-3xl font-bold">{games.rpgWins || 0}</p>
-          <p className="text-xs text-zinc-400 mt-1">🏆 Dungeon: {games.dungeonWins || 0}</p>
-        </div>
-        <div className="p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-center">
-          <h3 className="text-sm font-medium text-zinc-500">Casino Wins</h3>
-          <p className="mt-2 text-3xl font-bold">{games.casinoWins || 0}</p>
-          <p className="text-xs text-zinc-400 mt-1">🎰 Total games</p>
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-800">
+          <StatItem label="Pengikut" value={social.followers} icon={<Users className="w-4 h-4 text-blue-400" />} />
+          <StatItem label="Level" value={economy.level} icon={<Trophy className="w-4 h-4 text-yellow-400" />} />
+          <StatItem label="Dilihat" value={profile.profileViews} icon={<User className="w-4 h-4 text-purple-400" />} />
         </div>
       </div>
 
-      <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
-        <p className="text-sm text-zinc-500">
-          Ini adalah profile publik dari {profile.name}
-        </p>
+      {/* Games Stats */}
+      <div>
+        <h3 className="text-sm font-semibold text-slate-400 mb-3 flex items-center gap-2">
+          <Gamepad2 className="w-4 h-4" /> Statistik Permainan
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <GameCard title="RPG Wins" value={games.rpgWins} color="text-green-400" bg="bg-green-500/10" />
+          <GameCard title="Dungeon Wins" value={games.dungeonWins} color="text-red-400" bg="bg-red-500/10" />
+          <GameCard title="Casino Wins" value={games.casinoWins} color="text-pink-400" bg="bg-pink-500/10" />
+          <GameCard title="Total EXP" value={economy.exp.toLocaleString()} color="text-blue-400" bg="bg-blue-500/10" />
+        </div>
       </div>
-    </motion.div>
+
+      {/* Action Button */}
+      <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-900/20 active:scale-95">
+        Ikuti Pengguna
+      </button>
+    </div>
+  );
+}
+
+function StatItem({ label, value, icon }: any) {
+  return (
+    <div className="text-center">
+      <div className="flex justify-center mb-1">{icon}</div>
+      <div className="font-bold text-lg text-white">{value.toLocaleString()}</div>
+      <div className="text-xs text-slate-500 uppercase tracking-wider">{label}</div>
+    </div>
+  );
+}
+
+function GameCard({ title, value, color, bg }: any) {
+  return (
+    <div className={`p-4 rounded-2xl border border-slate-800 bg-slate-900/50 ${bg}`}>
+      <p className="text-xs text-slate-400 mb-1">{title}</p>
+      <p className={`text-xl font-bold ${color}`}>{value.toLocaleString()}</p>
+    </div>
   );
 }
