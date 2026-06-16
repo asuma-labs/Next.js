@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
+import Link from 'next/link';
 import {
   Bot, Users, Gamepad2, Download, Search, Zap,
   ArrowRight, CheckCircle2, Code2, Shield,
@@ -52,14 +53,14 @@ function FeatureCard({
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.5, delay }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className="group relative p-7 rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm flex flex-col gap-4 overflow-hidden"
+      className="group relative p-7 rounded-3xl border border-zinc-200 dark:border-white/[0.08] bg-white/60 dark:bg-white/[0.03] backdrop-blur-sm flex flex-col gap-4 overflow-hidden shadow-xs"
     >
       <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl ${accent}`} />
-      <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center">
+      <div className="relative z-10 w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/[0.06] border border-zinc-200/60 dark:border-white/[0.1] flex items-center justify-center">
         {icon}
       </div>
-      <h3 className="relative z-10 text-lg font-semibold text-white">{title}</h3>
-      <p className="relative z-10 text-sm text-slate-400 leading-relaxed">{description}</p>
+      <h3 className="relative z-10 text-lg font-semibold text-zinc-900 dark:text-white">{title}</h3>
+      <p className="relative z-10 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{description}</p>
     </motion.div>
   );
 }
@@ -79,14 +80,14 @@ function WhyCard({
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.45, delay }}
       whileHover={{ scale: 1.02 }}
-      className="flex gap-4 p-6 rounded-2xl bg-slate-800/40 border border-slate-700/40 backdrop-blur-sm"
+      className="flex gap-4 p-6 rounded-2xl bg-white/50 dark:bg-slate-800/40 border border-zinc-200 dark:border-slate-700/40 backdrop-blur-sm shadow-xs"
     >
       <div className="shrink-0 w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
         {icon}
       </div>
       <div>
-        <h4 className="font-semibold text-white mb-1">{title}</h4>
-        <p className="text-sm text-slate-400 leading-relaxed">{description}</p>
+        <h4 className="font-semibold text-zinc-900 dark:text-white mb-1">{title}</h4>
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{description}</p>
       </div>
     </motion.div>
   );
@@ -107,16 +108,16 @@ function StatCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
-      className="relative flex flex-col items-center gap-3 p-8 rounded-3xl border border-cyan-500/20 bg-gradient-to-b from-cyan-500/5 to-transparent backdrop-blur-sm text-center overflow-hidden"
+      className="relative flex flex-col items-center gap-3 p-8 rounded-3xl border border-cyan-500/15 dark:border-cyan-500/20 bg-gradient-to-b from-cyan-500/5 to-transparent backdrop-blur-sm text-center overflow-hidden shadow-xs"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/5 to-transparent" />
       <div className="relative z-10 w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
         {icon}
       </div>
-      <div className="relative z-10 text-4xl font-extrabold text-white tracking-tight">
+      <div className="relative z-10 text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
         <AnimatedCounter target={value} suffix={suffix ?? ''} />
       </div>
-      <p className="relative z-10 text-sm font-medium text-slate-400 uppercase tracking-wider">{label}</p>
+      <p className="relative z-10 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</p>
     </motion.div>
   );
 }
@@ -124,13 +125,12 @@ function StatCard({
 export default function Home() {
   return (
     <div
-      className="min-h-screen font-sans text-white overflow-x-hidden"
-      style={{ background: 'linear-gradient(135deg, #060D1F 0%, #0A1628 50%, #0D1B2E 100%)' }}
+      className="min-h-screen font-sans overflow-x-hidden bg-gradient-to-br from-zinc-50 via-slate-150 to-indigo-50/50 dark:from-[#060D1F] dark:via-[#0A1628] dark:to-[#0D1B2E] text-zinc-900 dark:text-white transition-colors duration-300"
     >
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute top-1/3 -right-40 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 w-96 h-64 rounded-full bg-teal-500/8 blur-3xl" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl opacity-75 dark:opacity-100" />
+        <div className="absolute top-1/3 -right-40 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl opacity-75 dark:opacity-100" />
+        <div className="absolute bottom-0 left-1/2 w-96 h-64 rounded-full bg-teal-500/8 blur-3xl opacity-75 dark:opacity-100" />
       </div>
 
       <main className="relative z-10 max-w-7xl mx-auto px-6">
@@ -140,9 +140,9 @@ export default function Home() {
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, type: 'spring', bounce: 0.4 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-sm font-medium text-cyan-300 mb-8"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 dark:border-cyan-500/30 text-sm font-medium text-cyan-700 dark:text-cyan-300 mb-8 shadow-xs"
           >
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-pulse" />
             🤖 WhatsApp Bot · Fast · Smart · Powerful
           </motion.div>
 
@@ -156,7 +156,7 @@ export default function Home() {
             {[1, 2, 3].map((i) => (
               <motion.div
                 key={i}
-                className="absolute inset-0 rounded-full border border-cyan-400/30"
+                className="absolute inset-0 rounded-full border border-cyan-400/20 dark:border-cyan-400/30"
                 animate={{ scale: [1, 1.6 + i * 0.3], opacity: [0.5, 0] }}
                 transition={{ duration: 2, delay: i * 0.5, repeat: Infinity, ease: 'easeOut' }}
               />
@@ -172,11 +172,11 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.15 }}
             className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] max-w-4xl text-balance"
           >
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-indigo-600 to-sky-600 dark:from-cyan-300 dark:via-sky-200 dark:to-indigo-300 animate-gradient">
               Asuma Bot
             </span>
             <br />
-            <span className="text-white/90 text-4xl md:text-5xl font-bold">
+            <span className="text-zinc-900/90 dark:text-white/90 text-4xl md:text-5xl font-bold">
               Smart WhatsApp Automation<br className="hidden md:block" /> for Everyone.
             </span>
           </motion.h1>
@@ -185,7 +185,7 @@ export default function Home() {
             initial={{ y: 24, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="mt-6 text-base md:text-lg text-slate-400 max-w-2xl leading-relaxed text-balance"
+            className="mt-6 text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed text-balance"
           >
             Asuma adalah bot WhatsApp multifungsi yang membantu pengguna mengelola grup, mencari informasi,
             bermain game, mengunduh media, dan mengotomatisasi berbagai aktivitas langsung dari WhatsApp.
@@ -201,36 +201,36 @@ export default function Home() {
               Coba Sekarang
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-            <a
+            <Link
               href="/about/asuma"
-              className="h-12 px-8 rounded-full bg-white/[0.06] border border-white/[0.12] text-white font-medium hover:bg-white/[0.1] transition-colors flex items-center justify-center backdrop-blur-sm"
+              className="h-12 px-8 rounded-full bg-zinc-100 dark:bg-white/[0.06] border border-zinc-200 dark:border-white/[0.12] text-zinc-900 dark:text-white font-medium hover:bg-zinc-200 dark:hover:bg-white/[0.1] transition-colors flex items-center justify-center backdrop-blur-sm shadow-xs"
             >
               Tentang Asuma
-            </a>
+            </Link>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.8 }}
-            className="mt-16 flex flex-col items-center gap-2 text-slate-600"
+            className="mt-16 flex flex-col items-center gap-2 text-slate-400 dark:text-slate-600"
           >
             <motion.div
               animate={{ y: [0, 6, 0] }}
               transition={{ duration: 1.6, repeat: Infinity }}
-              className="w-5 h-8 rounded-full border-2 border-slate-700 flex items-start justify-center pt-1.5"
+              className="w-5 h-8 rounded-full border-2 border-slate-300 dark:border-slate-700 flex items-start justify-center pt-1.5"
             >
-              <div className="w-1 h-2 rounded-full bg-slate-600" />
+              <div className="w-1 h-2 rounded-full bg-slate-400 dark:bg-slate-600" />
             </motion.div>
           </motion.div>
         </section>
 
         <section className="py-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={<Code2 className="w-6 h-6 text-cyan-400" />} value={100} suffix="+" label="Commands" delay={0} />
-            <StatCard icon={<Clock className="w-6 h-6 text-cyan-400" />} value={24} suffix="/7" label="Online" delay={0.1} />
-            <StatCard icon={<UserCheck className="w-6 h-6 text-cyan-400" />} value={1000} suffix="+" label="Users" delay={0.2} />
-            <StatCard icon={<TrendingUp className="w-6 h-6 text-cyan-400" />} value={30} suffix="+" label="Updates / Month" delay={0.3} />
+            <StatCard icon={<Code2 className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />} value={100} suffix="+" label="Commands" delay={0} />
+            <StatCard icon={<Clock className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />} value={24} suffix="/7" label="Online" delay={0.1} />
+            <StatCard icon={<UserCheck className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />} value={1000} suffix="+" label="Users" delay={0.2} />
+            <StatCard icon={<TrendingUp className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />} value={30} suffix="+" label="Updates / Month" delay={0.3} />
           </div>
         </section>
 
@@ -242,22 +242,22 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="text-center mb-14"
           >
-            <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400 mb-3">Fitur Unggulan</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Semua yang kamu butuhkan,<br className="hidden md:block" /> dalam satu bot.</h2>
-            <p className="mt-4 text-slate-400 max-w-xl mx-auto">Dari AI hingga game, dari downloader hingga manajemen grup — Asuma hadir lengkap.</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3">Fitur Unggulan</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">Semua yang kamu butuhkan,<br className="hidden md:block" /> dalam satu bot.</h2>
+            <p className="mt-4 text-slate-600 dark:text-slate-400 max-w-xl mx-auto">Dari AI hingga game, dari downloader hingga manajemen grup — Asuma hadir lengkap.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <FeatureCard delay={0}    accent="bg-gradient-to-br from-cyan-500/10 to-transparent"   icon={<Bot className="w-6 h-6 text-cyan-400" />}        title="AI Assistant"          description="Tanya apa saja langsung di WhatsApp. Didukung model AI canggih untuk menjawab pertanyaan, meringkas, dan membantu produktivitas." />
-            <FeatureCard delay={0.08} accent="bg-gradient-to-br from-indigo-500/10 to-transparent" icon={<Users className="w-6 h-6 text-indigo-400" />}     title="Group Management"      description="Kelola anggota, filter spam, atur izin, dan otomasi tugas admin grup dengan perintah sederhana." />
-            <FeatureCard delay={0.16} accent="bg-gradient-to-br from-purple-500/10 to-transparent" icon={<Gamepad2 className="w-6 h-6 text-purple-400" />}  title="RPG & Games"           description="Nikmati permainan RPG, tebak kata, trivia, dan berbagai mini-game seru langsung dalam chat grup." />
-            <FeatureCard delay={0.24} accent="bg-gradient-to-br from-pink-500/10 to-transparent"   icon={<Download className="w-6 h-6 text-pink-400" />}    title="Media Downloader"      description="Unduh video, audio, stiker, dan gambar dari berbagai platform populer hanya dengan mengirim link." />
-            <FeatureCard delay={0.32} accent="bg-gradient-to-br from-amber-500/10 to-transparent"  icon={<Search className="w-6 h-6 text-amber-400" />}     title="Search Information"    description="Cari berita, cuaca, lirik lagu, definisi kata, dan informasi real-time tanpa keluar dari WhatsApp." />
-            <FeatureCard delay={0.4}  accent="bg-gradient-to-br from-teal-500/10 to-transparent"   icon={<Zap className="w-6 h-6 text-teal-400" />}         title="Fast Response"         description="Dioptimalkan untuk latensi rendah dengan infrastruktur stabil agar bot selalu responsif sepanjang hari." />
+            <FeatureCard delay={0}    accent="bg-gradient-to-br from-cyan-500/10 to-transparent"   icon={<Bot className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />}        title="AI Assistant"          description="Tanya apa saja langsung di WhatsApp. Didukung model AI canggih untuk menjawab pertanyaan, meringkas, dan membantu produktivitas." />
+            <FeatureCard delay={0.08} accent="bg-gradient-to-br from-indigo-500/10 to-transparent" icon={<Users className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}     title="Group Management"      description="Kelola anggota, filter spam, atur izin, dan otomasi tugas admin grup dengan perintah sederhana." />
+            <FeatureCard delay={0.16} accent="bg-gradient-to-br from-purple-500/10 to-transparent" icon={<Gamepad2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />}  title="RPG & Games"           description="Nikmati permainan RPG, tebak kata, trivia, dan berbagai mini-game seru langsung dalam chat grup." />
+            <FeatureCard delay={0.24} accent="bg-gradient-to-br from-pink-500/10 to-transparent"   icon={<Download className="w-6 h-6 text-pink-600 dark:text-pink-400" />}    title="Media Downloader"      description="Unduh video, audio, stiker, dan gambar dari berbagai platform populer hanya dengan mengirim link." />
+            <FeatureCard delay={0.32} accent="bg-gradient-to-br from-amber-500/10 to-transparent"  icon={<Search className="w-6 h-6 text-amber-600 dark:text-amber-400" />}     title="Search Information"    description="Cari berita, cuaca, lirik lagu, definisi kata, dan informasi real-time tanpa keluar dari WhatsApp." />
+            <FeatureCard delay={0.4}  accent="bg-gradient-to-br from-teal-500/10 to-transparent"   icon={<Zap className="w-6 h-6 text-teal-600 dark:text-teal-400" />}         title="Fast Response"         description="Dioptimalkan untuk latensi rendah dengan infrastruktur stabil agar bot selalu responsif sepanjang hari." />
           </div>
         </section>
 
-        <section className="py-20 md:py-28 border-t border-white/[0.06]">
+        <section className="py-20 md:py-28 border-t border-zinc-200 dark:border-white/[0.06]">
           <div className="flex flex-col md:flex-row gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -271,7 +271,7 @@ export default function Home() {
                 D
               </div>
               <div className="mt-4 text-center">
-                <p className="font-bold text-white text-lg">Ditss</p>
+                <p className="font-bold text-zinc-900 dark:text-white text-lg">Ditss</p>
                 <p className="text-sm text-slate-500">Aditia · Developer</p>
               </div>
             </motion.div>
@@ -284,16 +284,16 @@ export default function Home() {
               className="space-y-6"
             >
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-2">Tentang Pembuat</p>
-                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2">Tentang Pembuat</p>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
                   Dibuat oleh{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-cyan-300">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-600 dark:from-indigo-300 dark:to-cyan-300">
                     Ditss
                   </span>
                 </h2>
               </div>
-              <p className="text-slate-400 leading-relaxed text-base md:text-lg">
-                Asuma dikembangkan oleh <span className="text-white font-medium">Ditss (Aditia)</span>, seorang
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-base md:text-lg">
+                Asuma dikembangkan oleh <span className="text-zinc-900 dark:text-white font-medium">Ditss (Aditia)</span>, seorang
                 developer yang berfokus pada pengembangan WhatsApp Bot, backend API, dan aplikasi web modern.
                 Tujuan Asuma adalah menghadirkan solusi otomatisasi yang mudah digunakan dan bermanfaat bagi
                 semua pengguna.
@@ -306,32 +306,32 @@ export default function Home() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.2 + i * 0.1 }}
-                    className="flex items-center gap-3 text-slate-300 font-medium"
+                    className="flex items-center gap-3 text-slate-700 dark:text-slate-300 font-medium"
                   >
-                    <CheckCircle2 className="w-5 h-5 text-cyan-400 shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-cyan-500 dark:text-cyan-400 shrink-0" />
                     {item}
                   </motion.li>
                 ))}
               </ul>
               <div className="flex flex-wrap gap-3 pt-2">
-                <a
+                <Link
                   href="/about/ditss"
-                  className="h-11 px-6 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-medium hover:bg-indigo-500/25 transition-colors flex items-center gap-2 text-sm"
+                  className="h-11 px-6 rounded-full bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 font-medium hover:bg-indigo-500/20 dark:hover:bg-indigo-500/25 transition-colors flex items-center gap-2 text-sm shadow-xs"
                 >
                   About Developer <ChevronRight className="w-4 h-4" />
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/about/asuma"
-                  className="h-11 px-6 rounded-full bg-white/[0.05] border border-white/[0.1] text-white font-medium hover:bg-white/[0.1] transition-colors flex items-center gap-2 text-sm"
+                  className="h-11 px-6 rounded-full bg-zinc-100 dark:bg-white/[0.05] border border-zinc-200 dark:border-white/[0.1] text-zinc-900 dark:text-white font-medium hover:bg-zinc-200 dark:hover:bg-white/[0.1] transition-colors flex items-center gap-2 text-sm shadow-xs"
                 >
                   About Asuma <ChevronRight className="w-4 h-4" />
-                </a>
+                </Link>
               </div>
             </motion.div>
           </div>
         </section>
 
-        <section className="py-20 md:py-28 border-t border-white/[0.06]">
+        <section className="py-20 md:py-28 border-t border-zinc-200 dark:border-white/[0.06]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -339,20 +339,20 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="text-center mb-14"
           >
-            <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400 mb-3">Kenapa Asuma?</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+            <p className="text-xs font-semibold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-3">Kenapa Asuma?</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
               Dipilih bukan tanpa alasan.
             </h2>
-            <p className="mt-4 text-slate-400 max-w-lg mx-auto">Asuma dirancang agar benar-benar berguna, bukan sekadar terlihat keren.</p>
+            <p className="mt-4 text-slate-600 dark:text-slate-400 max-w-lg mx-auto">Asuma dirancang agar benar-benar berguna, bukan sekadar terlihat keren.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <WhyCard delay={0}    icon={<Zap className="w-5 h-5 text-cyan-400" />}            title="Cepat & Stabil"      description="Respons instan dengan infrastruktur yang dioptimalkan untuk uptime tinggi sepanjang waktu." />
-            <WhyCard delay={0.07} icon={<Sparkles className="w-5 h-5 text-cyan-400" />}       title="Banyak Fitur"        description="Lebih dari 100 perintah tersedia — satu bot untuk semua kebutuhan kamu di WhatsApp." />
-            <WhyCard delay={0.14} icon={<Activity className="w-5 h-5 text-cyan-400" />}       title="Selalu Dikembangkan" description="Update rutin setiap bulan menghadirkan fitur baru berdasarkan masukan pengguna langsung." />
-            <WhyCard delay={0.21} icon={<MessageCircle className="w-5 h-5 text-cyan-400" />}  title="Mudah Digunakan"     description="Perintah sederhana, dokumentasi jelas, dan tidak perlu instalasi apapun dari pengguna." />
-            <WhyCard delay={0.28} icon={<Shield className="w-5 h-5 text-cyan-400" />}         title="Aman"                description="Tidak menyimpan pesan pribadi. Privasi pengguna adalah prioritas dalam setiap fitur." />
-            <WhyCard delay={0.35} icon={<Heart className="w-5 h-5 text-cyan-400" />}          title="Gratis Digunakan"    description="Semua fitur inti tersedia gratis. Tidak ada paywall tersembunyi untuk fungsi utama." />
+            <WhyCard delay={0}    icon={<Zap className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />}            title="Cepat & Stabil"      description="Respons instan dengan infrastruktur yang dioptimalkan untuk uptime tinggi sepanjang waktu." />
+            <WhyCard delay={0.07} icon={<Sparkles className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />}       title="Banyak Fitur"        description="Lebih dari 100 perintah tersedia — satu bot untuk semua kebutuhan kamu di WhatsApp." />
+            <WhyCard delay={0.14} icon={<Activity className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />}       title="Selalu Dikembangkan" description="Update rutin setiap bulan menghadirkan fitur baru berdasarkan masukan pengguna langsung." />
+            <WhyCard delay={0.21} icon={<MessageCircle className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />}  title="Mudah Digunakan"     description="Perintah sederhana, dokumentasi jelas, dan tidak perlu instalasi apapun dari pengguna." />
+            <WhyCard delay={0.28} icon={<Shield className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />}         title="Aman"                description="Tidak menyimpan pesan pribadi. Privasi pengguna adalah prioritas dalam setiap fitur." />
+            <WhyCard delay={0.35} icon={<Heart className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />}          title="Gratis Digunakan"    description="Semua fitur inti tersedia gratis. Tidak ada paywall tersembunyi untuk fungsi utama." />
           </div>
         </section>
 
@@ -366,8 +366,8 @@ export default function Home() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/60 via-indigo-900/60 to-slate-900/80" />
             <div className="absolute inset-0 border border-cyan-500/20 rounded-3xl" />
-            <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl" />
-            <div className="absolute -bottom-8 -left-8 w-48 h-48 rounded-full bg-cyan-500/10 blur-3xl" />
+            <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl animate-pulse" />
+            <div className="absolute -bottom-8 -left-8 w-48 h-48 rounded-full bg-cyan-500/10 blur-3xl animate-pulse" />
 
             <div className="relative z-10 px-8 py-20 md:py-28 flex flex-col items-center text-center">
               <motion.div
@@ -379,13 +379,13 @@ export default function Home() {
               >
                 <Bot className="w-8 h-8 text-white" />
               </motion.div>
-              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight max-w-2xl">
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight max-w-2xl text-white">
                 Siap mencoba{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-indigo-300">
                   Asuma Bot?
                 </span>
               </h2>
-              <p className="mt-5 text-base md:text-lg text-slate-400 max-w-xl">
+              <p className="mt-5 text-base md:text-lg text-slate-300 max-w-xl">
                 Gunakan Asuma sekarang dan nikmati pengalaman WhatsApp yang lebih cerdas, praktis, dan menyenangkan.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row gap-3">
@@ -393,13 +393,13 @@ export default function Home() {
                   <Zap className="w-5 h-5" />
                   Mulai Sekarang
                 </button>
-                <a
+                <Link
                   href="/docs"
                   className="px-9 py-3.5 rounded-full bg-white/[0.08] border border-white/[0.15] text-white font-semibold hover:bg-white/[0.14] transition-colors flex items-center justify-center gap-2"
                 >
                   <BookOpen className="w-4 h-4" />
                   Pelajari Lebih Lanjut
-                </a>
+                </Link>
               </div>
             </div>
           </motion.div>
@@ -407,7 +407,7 @@ export default function Home() {
 
       </main>
 
-      <footer className="relative z-10 border-t border-white/[0.06] bg-slate-950/60 backdrop-blur-sm pt-16 pb-8">
+      <footer className="relative z-10 border-t border-zinc-200 dark:border-white/[0.06] bg-zinc-100/80 dark:bg-slate-950/60 backdrop-blur-sm pt-16 pb-8 text-zinc-600 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
             <div className="md:col-span-2 space-y-4">
@@ -415,23 +415,23 @@ export default function Home() {
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
                   <Bot className="w-5 h-5 text-white" />
                 </div>
-                <span className="font-extrabold text-xl tracking-tight text-white">Asuma</span>
+                <span className="font-extrabold text-xl tracking-tight text-zinc-900 dark:text-white">Asuma</span>
               </div>
-              <p className="text-slate-500 max-w-xs text-sm leading-relaxed">
+              <p className="text-zinc-500 dark:text-slate-500 max-w-xs text-sm leading-relaxed">
                 WhatsApp Bot modern yang dirancang untuk membantu produktivitas, hiburan, dan otomatisasi dalam satu platform.
               </p>
             </div>
 
             <div>
-              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Navigasi</h4>
-              <ul className="space-y-3 text-sm text-slate-500">
+              <h4 className="font-semibold text-zinc-800 dark:text-white mb-5 text-sm uppercase tracking-wider">Navigasi</h4>
+              <ul className="space-y-3 text-sm text-zinc-500">
                 {[
                   { label: 'Home', href: '/', icon: HomeIcon },
                   { label: 'About', href: '/about', icon: UserCheck },
                   { label: 'Documentation', href: '/docs', icon: BookOpen },
                 ].map(({ label, href, icon: Icon }) => (
                   <li key={label}>
-                    <a href={href} className="flex items-center gap-2 hover:text-white transition-colors">
+                    <a href={href} className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 dark:text-slate-500 dark:hover:text-white transition-colors">
                       <Icon className="w-4 h-4" /> {label}
                     </a>
                   </li>
@@ -440,8 +440,8 @@ export default function Home() {
             </div>
 
             <div>
-              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Tautan</h4>
-              <ul className="space-y-3 text-sm text-slate-500">
+              <h4 className="font-semibold text-zinc-800 dark:text-white mb-5 text-sm uppercase tracking-wider">Tautan</h4>
+              <ul className="space-y-3 text-sm text-zinc-500">
                 {[
                   { label: 'GitHub', href: 'https://github.com', icon: Github },
                   { label: 'Contact', href: '/contact', icon: Mail },
@@ -449,7 +449,7 @@ export default function Home() {
                   <li key={label}>
                     <a
                       href={href}
-                      className="flex items-center gap-2 hover:text-white transition-colors"
+                      className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 dark:text-slate-500 dark:hover:text-white transition-colors"
                       target={href.startsWith('http') ? '_blank' : undefined}
                       rel="noreferrer"
                     >
@@ -461,9 +461,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="border-t border-white/[0.06] pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-600">
+          <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-zinc-500 dark:text-slate-600">
             <p>© {new Date().getFullYear()} Asuma. All rights reserved.</p>
-            <p className="text-slate-700 text-xs">
+            <p className="text-zinc-400 dark:text-slate-700 text-xs">
               Developed with <Heart className="w-3 h-3 inline text-red-500/70" /> by Ditss · asuma.my.id
             </p>
           </div>
