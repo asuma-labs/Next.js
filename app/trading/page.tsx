@@ -16,8 +16,6 @@ import {
     AlertCircle,
     CheckCircle,
     Loader2,
-    TrendingUp,
-    TrendingDown,
 } from 'lucide-react';
 import { getToken } from '@/lib/auth';
 import { createChart, ColorType, CrosshairMode } from 'lightweight-charts';
@@ -110,15 +108,13 @@ export default function TradingPage() {
 
                         if (data.type === 'price_update') {
                             setAssets(data.assets);
-                            // Update chart dengan harga terbaru
                             if (selectedAsset) {
                                 const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
                                 if (updatedAsset && seriesRef.current) {
                                     const time = new Date();
-                                    const price = updatedAsset.price;
                                     seriesRef.current.update({
                                         time: Math.floor(time.getTime() / 1000),
-                                        value: price,
+                                        value: updatedAsset.price,
                                     });
                                 }
                             }
@@ -209,7 +205,7 @@ export default function TradingPage() {
 
         chartRef.current = chart;
 
-        const areaSeries = chart.addAreaSeries({
+        const areaSeries = chart.addSeries('Area', {
             lineColor: '#00e5a0',
             topColor: '#00e5a030',
             bottomColor: '#00e5a005',
@@ -247,27 +243,6 @@ export default function TradingPage() {
             chart.remove();
         };
     }, [selectedAsset]);
-
-    useEffect(() => {
-        if (!chartRef.current) return;
-        const isDark = document.documentElement.classList.contains('dark');
-        chartRef.current.applyOptions({
-            layout: {
-                background: { color: isDark ? '#0a0c10' : '#ffffff' },
-                textColor: isDark ? '#d1d5db' : '#1f2937',
-            },
-            grid: {
-                vertLines: { color: isDark ? '#1e2330' : '#e5e7eb' },
-                horzLines: { color: isDark ? '#1e2330' : '#e5e7eb' },
-            },
-            rightPriceScale: {
-                borderColor: isDark ? '#1e2330' : '#e5e7eb',
-            },
-            timeScale: {
-                borderColor: isDark ? '#1e2330' : '#e5e7eb',
-            },
-        });
-    }, [typeof document !== 'undefined' && document.documentElement.classList.contains('dark')]);
 
     const handleTrade = () => {
         if (!selectedAsset || !tradeAmount || !wsRef.current) {
@@ -320,16 +295,6 @@ export default function TradingPage() {
             case 'sbn': return 'text-emerald-500';
             case 'gauge': return 'text-purple-500';
             default: return 'text-zinc-500';
-        }
-    };
-
-    const getAssetBg = (id: string) => {
-        switch (id) {
-            case 'btc': return 'bg-orange-500/10 border-orange-500/20';
-            case 'eth': return 'bg-indigo-500/10 border-indigo-500/20';
-            case 'sbn': return 'bg-emerald-500/10 border-emerald-500/20';
-            case 'gauge': return 'bg-purple-500/10 border-purple-500/20';
-            default: return 'bg-zinc-500/10 border-zinc-500/20';
         }
     };
 
