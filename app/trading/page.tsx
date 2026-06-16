@@ -6,12 +6,9 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import {
     ArrowLeft,
-    TrendingUp,
-    TrendingDown,
     Wallet,
     Plus,
     Minus,
-    RefreshCw,
     Bitcoin,
     Coins,
     Landmark,
@@ -19,8 +16,11 @@ import {
     AlertCircle,
     CheckCircle,
     Loader2,
+    TrendingUp,
+    TrendingDown,
 } from 'lucide-react';
 import { getToken } from '@/lib/auth';
+import { createChart, ColorType, CrosshairMode } from 'lightweight-charts';
 
 interface Asset {
     id: string;
@@ -65,6 +65,9 @@ export default function TradingPage() {
 
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
+    const chartContainerRef = useRef<HTMLDivElement>(null);
+    const chartRef = useRef<any>(null);
+    const seriesRef = useRef<any>(null);
 
     useEffect(() => {
         const t = getToken();
@@ -100,10 +103,25 @@ export default function TradingPage() {
                             setBalance(data.balance);
                             setPortfolio(data.portfolio || []);
                             setLoading(false);
+                            if (data.assets.length > 0) {
+                                setSelectedAsset(data.assets[0]);
+                            }
                         }
 
                         if (data.type === 'price_update') {
                             setAssets(data.assets);
+                            // Update chart dengan harga terbaru
+                            if (selectedAsset) {
+                                const updatedAsset = data.assets.find((a: Asset) => a.id === selectedAsset.id);
+                                if (updatedAsset && seriesRef.current) {
+                                    const time = new Date();
+                                    const price = updatedAsset.price;
+                                    seriesRef.current.update({
+                                        time: Math.floor(time.getTime() / 1000),
+                                        value: price,
+                                    });
+                                }
+                            }
                         }
 
                         if (data.type === 'trade_success') {
@@ -159,6 +177,97 @@ export default function TradingPage() {
             if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
         };
     }, [token]);
+
+    useEffect(() => {
+        if (!chartContainerRef.current || !selectedAsset) return;
+
+        const isDark = document.documentElement.classList.contains('dark');
+
+        const chart = createChart(chartContainerRef.current, {
+            width: chartContainerRef.current.clientWidth,
+            height: 400,
+            layout: {
+                background: { color: isDark ? '#0a0c10' : '#ffffff' },
+                textColor: isDark ? '#d1d5db' : '#1f2937',
+            },
+            grid: {
+                vertLines: { color: isDark ? '#1e2330' : '#e5e7eb' },
+                horzLines: { color: isDark ? '#1e2330' : '#e5e7eb' },
+            },
+            crosshair: {
+                mode: CrosshairMode.Normal,
+            },
+            rightPriceScale: {
+                borderColor: isDark ? '#1e2330' : '#e5e7eb',
+            },
+            timeScale: {
+                borderColor: isDark ? '#1e2330' : '#e5e7eb',
+                timeVisible: true,
+                secondsVisible: false,
+            },
+        });
+
+        chartRef.current = chart;
+
+        const areaSeries = chart.addAreaSeries({
+            lineColor: '#00e5a0',
+            topColor: '#00e5a030',
+            bottomColor: '#00e5a005',
+            lineWidth: 2,
+        });
+
+        seriesRef.current = areaSeries;
+
+        const now = new Date();
+        const data = [];
+        for (let i = 0; i < 30; i++) {
+            const time = new Date(now.getTime() - (30 - i) * 10000);
+            const basePrice = selectedAsset.price || 965000;
+            const randomChange = (Math.random() - 0.5) * 1000;
+            data.push({
+                time: Math.floor(time.getTime() / 1000),
+                value: basePrice + randomChange,
+            });
+        }
+
+        areaSeries.setData(data);
+
+        const handleResize = () => {
+            if (chartContainerRef.current) {
+                chart.applyOptions({
+                    width: chartContainerRef.current.clientWidth,
+                });
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            chart.remove();
+        };
+    }, [selectedAsset]);
+
+    useEffect(() => {
+        if (!chartRef.current) return;
+        const isDark = document.documentElement.classList.contains('dark');
+        chartRef.current.applyOptions({
+            layout: {
+                background: { color: isDark ? '#0a0c10' : '#ffffff' },
+                textColor: isDark ? '#d1d5db' : '#1f2937',
+            },
+            grid: {
+                vertLines: { color: isDark ? '#1e2330' : '#e5e7eb' },
+                horzLines: { color: isDark ? '#1e2330' : '#e5e7eb' },
+            },
+            rightPriceScale: {
+                borderColor: isDark ? '#1e2330' : '#e5e7eb',
+            },
+            timeScale: {
+                borderColor: isDark ? '#1e2330' : '#e5e7eb',
+            },
+        });
+    }, [typeof document !== 'undefined' && document.documentElement.classList.contains('dark')]);
 
     const handleTrade = () => {
         if (!selectedAsset || !tradeAmount || !wsRef.current) {
@@ -259,7 +368,7 @@ export default function TradingPage() {
                 <div className="absolute bottom-0 right-1/4 w-96 h-64 rounded-full bg-indigo-500/10 blur-3xl opacity-75 dark:opacity-100" />
             </div>
 
-            <div className="w-full max-w-4xl mx-auto relative z-10">
+            <div className="w-full max-w-6xl mx-auto relative z-10">
                 <div className="flex items-center justify-between mb-8">
                     <Link href="/" className="inline-flex items-center text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors font-medium">
                         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -271,13 +380,10 @@ export default function TradingPage() {
                     </div>
                 </div>
 
-                <div className="text-center space-y-4 mb-10">
+                <div className="text-center space-y-4 mb-8">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-650 via-indigo-650 to-sky-650 dark:from-cyan-300 dark:via-sky-200 dark:to-indigo-300 bg-clip-text text-transparent">
                         Virtual Trading
                     </h1>
-                    <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto text-lg leading-relaxed">
-                        Trading aset virtual secara real-time
-                    </p>
                 </div>
 
                 {message && (
@@ -290,201 +396,217 @@ export default function TradingPage() {
                     </div>
                 )}
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
-                        <p className="text-xs text-zinc-500">Portfolio</p>
-                        <p className="text-xl font-bold mt-1">Rp {totalPortfolioValue.toLocaleString('id-ID')}</p>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
-                        <p className="text-xs text-zinc-500">P/L</p>
-                        <p className={`text-xl font-bold mt-1 ${totalProfitLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {totalProfitLoss >= 0 ? '+' : ''}
-                            Rp {totalProfitLoss.toLocaleString('id-ID')}
-                        </p>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
-                        <p className="text-xs text-zinc-500">Saldo</p>
-                        <p className="text-xl font-bold mt-1">Rp {balance.toLocaleString('id-ID')}</p>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
-                        <p className="text-xs text-zinc-500">Aset</p>
-                        <p className="text-xl font-bold mt-1">{portfolio.filter(p => p.amount > 0).length}</p>
-                    </div>
-                </div>
-
-                <div className="p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 mb-6">
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
-                        <Wallet className="w-4 h-4" />
-                        Market Assets
-                    </h3>
-                    <div className="grid gap-3">
-                        {assets.map((asset) => {
-                            const userAsset = portfolio.find((p) => p.id === asset.id);
-                            const isSelected = selectedAsset?.id === asset.id;
-                            const color = getAssetColor(asset.id);
-                            const bg = getAssetBg(asset.id);
-
-                            return (
-                                <button
-                                    key={asset.id}
-                                    onClick={() => setSelectedAsset(asset)}
-                                    className={`flex items-center justify-between p-4 rounded-xl transition-all ${isSelected
-                                            ? 'bg-cyan-500/10 border border-cyan-500/20'
-                                            : 'bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 ${color}`}>
-                                            {getAssetIcon(asset.id)}
-                                        </div>
-                                        <div className="text-left">
-                                            <p className="font-medium">{asset.name}</p>
-                                            <p className="text-xs text-zinc-500">{asset.symbol}</p>
-                                        </div>
-                                        {userAsset && userAsset.amount > 0 && (
-                                            <span className="text-xs bg-zinc-200 dark:bg-zinc-700 px-2 py-0.5 rounded-full">
-                                                {userAsset.amount.toFixed(4)} {asset.symbol}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="font-medium">Rp {asset.price.toLocaleString('id-ID')}</p>
-                                        <p className={`text-sm ${asset.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                            {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(1)}%
-                                        </p>
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {selectedAsset && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 mb-6"
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 ${getAssetColor(selectedAsset.id)}`}>
-                                    {getAssetIcon(selectedAsset.id)}
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold">{selectedAsset.name}</h4>
-                                    <p className="text-sm text-zinc-500">Rp {selectedAsset.price.toLocaleString('id-ID')}</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setIsBuying(true)}
-                                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${isBuying
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                                        }`}
-                                >
-                                    Buy
-                                </button>
-                                <button
-                                    onClick={() => setIsBuying(false)}
-                                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${!isBuying
-                                            ? 'bg-red-500 text-white'
-                                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                                        }`}
-                                >
-                                    Sell
-                                </button>
-                            </div>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <div className="lg:col-span-1 space-y-4">
+                        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
+                            <p className="text-xs text-zinc-500">Saldo</p>
+                            <p className="text-xl font-bold mt-1">Rp {balance.toLocaleString('id-ID')}</p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
+                            <p className="text-xs text-zinc-500">Portfolio</p>
+                            <p className="text-xl font-bold mt-1">Rp {totalPortfolioValue.toLocaleString('id-ID')}</p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
+                            <p className="text-xs text-zinc-500">P/L</p>
+                            <p className={`text-xl font-bold mt-1 ${totalProfitLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                {totalProfitLoss >= 0 ? '+' : ''}
+                                Rp {totalProfitLoss.toLocaleString('id-ID')}
+                            </p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
+                            <p className="text-xs text-zinc-500">Aset</p>
+                            <p className="text-xl font-bold mt-1">{portfolio.filter(p => p.amount > 0).length}</p>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
-                                    Jumlah {selectedAsset.symbol}
-                                </label>
-                                <input
-                                    type="number"
-                                    value={tradeAmount}
-                                    onChange={(e) => setTradeAmount(e.target.value)}
-                                    placeholder="0.00"
-                                    className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-                                />
-                            </div>
-                            <div className="flex items-end">
-                                <button
-                                    onClick={handleTrade}
-                                    disabled={isTrading}
-                                    className={`px-6 py-2.5 rounded-xl font-semibold text-white transition-all disabled:opacity-50 ${isBuying
-                                            ? 'bg-green-500 hover:bg-green-600 shadow-lg shadow-green-500/25'
-                                            : 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/25'
-                                        }`}
-                                >
-                                    {isTrading ? (
-                                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                                    ) : isBuying ? (
-                                        <span className="flex items-center gap-2">
-                                            <Plus className="w-4 h-4" /> Buy
-                                        </span>
-                                    ) : (
-                                        <span className="flex items-center gap-2">
-                                            <Minus className="w-4 h-4" /> Sell
-                                        </span>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="mt-3 flex justify-between text-sm text-zinc-500">
-                            <span>Total: Rp {(parseFloat(tradeAmount || '0') * selectedAsset.price).toLocaleString('id-ID')}</span>
-                            <span>Saldo: Rp {balance.toLocaleString('id-ID')}</span>
-                        </div>
-                    </motion.div>
-                )}
-
-                {portfolio.filter((p) => p.amount > 0).length > 0 && (
-                    <div className="p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <Wallet className="w-4 h-4" />
-                            My Portfolio
-                        </h3>
-                        <div className="space-y-3">
-                            {portfolio
-                                .filter((p) => p.amount > 0)
-                                .map((p) => {
-                                    const asset = assets.find((a) => a.id === p.id);
-                                    if (!asset) return null;
-                                    const currentValue = p.amount * asset.price;
-                                    const profit = currentValue - p.amount * p.buyPrice;
-
+                        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
+                            <p className="text-xs text-zinc-500 mb-3">Asset List</p>
+                            <div className="space-y-2">
+                                {assets.map((asset) => {
+                                    const isSelected = selectedAsset?.id === asset.id;
+                                    const userAsset = portfolio.find((p) => p.id === asset.id);
                                     return (
-                                        <div
-                                            key={p.id}
-                                            className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800"
+                                        <button
+                                            key={asset.id}
+                                            onClick={() => setSelectedAsset(asset)}
+                                            className={`w-full flex items-center justify-between p-2 rounded-lg transition-all text-sm ${isSelected
+                                                    ? 'bg-cyan-500/10 border border-cyan-500/20'
+                                                    : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                                }`}
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 ${getAssetColor(p.id)}`}>
-                                                    {getAssetIcon(p.id)}
+                                            <div className="flex items-center gap-2">
+                                                <div className={`${getAssetColor(asset.id)}`}>
+                                                    {getAssetIcon(asset.id)}
                                                 </div>
-                                                <div>
-                                                    <p className="font-medium">{p.symbol}</p>
-                                                    <p className="text-sm text-zinc-500">
-                                                        {p.amount.toFixed(4)} · Buy: Rp {p.buyPrice.toLocaleString('id-ID')}
-                                                    </p>
-                                                </div>
+                                                <span>{asset.symbol}</span>
+                                                {userAsset && userAsset.amount > 0 && (
+                                                    <span className="text-xs text-zinc-500">
+                                                        {userAsset.amount.toFixed(4)}
+                                                    </span>
+                                                )}
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-medium">Rp {currentValue.toLocaleString('id-ID')}</p>
-                                                <p className={`text-sm ${profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                    {profit >= 0 ? '+' : ''}
-                                                    Rp {profit.toLocaleString('id-ID')}
+                                                <p className="font-medium text-xs">Rp {asset.price.toLocaleString('id-ID')}</p>
+                                                <p className={`text-xs ${asset.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                    {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(1)}%
                                                 </p>
                                             </div>
-                                        </div>
+                                        </button>
                                     );
                                 })}
+                            </div>
                         </div>
                     </div>
-                )}
+
+                    <div className="lg:col-span-3 space-y-4">
+                        <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 className="text-lg font-bold">
+                                        {selectedAsset?.name || 'Pilih Aset'}
+                                    </h3>
+                                    <p className="text-sm text-zinc-500">
+                                        {selectedAsset?.symbol || ''} · Rp {selectedAsset?.price.toLocaleString('id-ID') || 0}
+                                    </p>
+                                </div>
+                                <div className={`text-sm font-semibold ${selectedAsset?.change && selectedAsset.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {selectedAsset?.change && selectedAsset.change >= 0 ? '+' : ''}
+                                    {selectedAsset?.change?.toFixed(2) || 0}%
+                                </div>
+                            </div>
+                            <div ref={chartContainerRef} className="w-full h-[400px]" />
+
+                            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                                        Jumlah {selectedAsset?.symbol || ''}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={tradeAmount}
+                                        onChange={(e) => setTradeAmount(e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full px-4 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                                    />
+                                    <div className="mt-2 flex gap-2">
+                                        <button
+                                            onClick={() => setTradeAmount('0.001')}
+                                            className="px-2 py-0.5 text-xs rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                                        >
+                                            0.001
+                                        </button>
+                                        <button
+                                            onClick={() => setTradeAmount('0.01')}
+                                            className="px-2 py-0.5 text-xs rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                                        >
+                                            0.01
+                                        </button>
+                                        <button
+                                            onClick={() => setTradeAmount('0.1')}
+                                            className="px-2 py-0.5 text-xs rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                                        >
+                                            0.1
+                                        </button>
+                                        <button
+                                            onClick={() => setTradeAmount('1')}
+                                            className="px-2 py-0.5 text-xs rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                                        >
+                                            1
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2 items-end">
+                                    <button
+                                        onClick={() => setIsBuying(true)}
+                                        className={`px-6 py-2.5 rounded-xl font-semibold transition-all ${isBuying
+                                                ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
+                                                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                                            }`}
+                                    >
+                                        Buy
+                                    </button>
+                                    <button
+                                        onClick={() => setIsBuying(false)}
+                                        className={`px-6 py-2.5 rounded-xl font-semibold transition-all ${!isBuying
+                                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
+                                                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                                            }`}
+                                    >
+                                        Sell
+                                    </button>
+                                    <button
+                                        onClick={handleTrade}
+                                        disabled={isTrading}
+                                        className={`px-6 py-2.5 rounded-xl font-semibold text-white transition-all disabled:opacity-50 ${isBuying
+                                                ? 'bg-green-600 hover:bg-green-700'
+                                                : 'bg-red-600 hover:bg-red-700'
+                                            }`}
+                                    >
+                                        {isTrading ? (
+                                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                                        ) : isBuying ? (
+                                            <span className="flex items-center gap-2">
+                                                <Plus className="w-4 h-4" /> Buy
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-2">
+                                                <Minus className="w-4 h-4" /> Sell
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="mt-3 flex justify-between text-sm text-zinc-500">
+                                <span>Total: Rp {(parseFloat(tradeAmount || '0') * (selectedAsset?.price || 0)).toLocaleString('id-ID')}</span>
+                                <span>Saldo: Rp {balance.toLocaleString('id-ID')}</span>
+                            </div>
+                        </div>
+
+                        {portfolio.filter((p) => p.amount > 0).length > 0 && (
+                            <div className="p-4 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
+                                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Wallet className="w-4 h-4" />
+                                    My Portfolio
+                                </h3>
+                                <div className="space-y-2">
+                                    {portfolio
+                                        .filter((p) => p.amount > 0)
+                                        .map((p) => {
+                                            const asset = assets.find((a) => a.id === p.id);
+                                            if (!asset) return null;
+                                            const currentValue = p.amount * asset.price;
+                                            const profit = currentValue - p.amount * p.buyPrice;
+
+                                            return (
+                                                <div
+                                                    key={p.id}
+                                                    className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 ${getAssetColor(p.id)}`}>
+                                                            {getAssetIcon(p.id)}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-medium">{p.symbol}</p>
+                                                            <p className="text-sm text-zinc-500">
+                                                                {p.amount.toFixed(4)} · Buy: Rp {p.buyPrice.toLocaleString('id-ID')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-medium">Rp {currentValue.toLocaleString('id-ID')}</p>
+                                                        <p className={`text-sm ${profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                            {profit >= 0 ? '+' : ''}
+                                                            Rp {profit.toLocaleString('id-ID')}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
