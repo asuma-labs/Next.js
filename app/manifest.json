@@ -1,0 +1,64 @@
+{
+  "name": "Asuma Bot - Smart WhatsApp Automation",
+  "short_name": "Asuma Bot",
+  "description": "Bot WhatsApp multifungsi dengan AI assistant, downloader media, manajemen grup, dan 100+ perintah.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "id": "/?source=pwa",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#09090b",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["utilities", "productivity", "communication"],
+  "icons": [
+    {
+      "src": "/icons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Buka Bot",
+      "short_name": "Bot",
+      "description": "Buka Asuma Bot",
+      "url": "/?source=pwa",
+      "icons": [
+        {
+          "src": "/icons/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Perintah Populer",
+      "short_name": "Commands",
+      "description": "Lihat daftar perintah",
+      "url": "/commands?source=pwa",
+      "icons": [
+        {
+          "src": "/icons/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
