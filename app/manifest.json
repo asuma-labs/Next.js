@@ -1,8 +1,8 @@
 {
   "name": "Asuma Bot - Smart WhatsApp Automation",
   "short_name": "Asuma Bot",
-  "description": "Asuma adalah bot WhatsApp multifungsi — AI assistant, manajemen grup, downloader media, RPG & games, dan lebih dari 100 perintah siap pakai.",
-  "start_url": "/?source=pwa",
+  "description": "Asuma adalah bot WhatsApp multifungsi — AI assistant, manajemen grup, downloader media, RPG &amp; games, dan lebih dari 100 perintah siap pakai.",
+  "start_url": "/",
   "scope": "/",
   "id": "/?source=pwa",
   "display": "standalone",
@@ -10,14 +10,20 @@
     "standalone",
     "minimal-ui",
     "fullscreen",
-    "browser"
+    "browser",
+    "window-controls-overlay"
   ],
   "background_color": "#09090b",
   "theme_color": "#0f172a",
   "orientation": "any",
   "lang": "id",
   "dir": "ltr",
-  "categories": ["utilities", "productivity", "communication", "social"],
+  "categories": [
+    "utilities",
+    "productivity",
+    "communication",
+    "social"
+  ],
   "share_target": {
     "action": "/share",
     "method": "POST",
@@ -29,7 +35,13 @@
       "files": [
         {
           "name": "files",
-          "accept": ["image/*", "video/*", "audio/*", "application/pdf", ".pdf"]
+          "accept": [
+            "image/*",
+            "video/*",
+            "audio/*",
+            "application/pdf",
+            ".pdf"
+          ]
         }
       ]
     }
