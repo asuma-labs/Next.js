@@ -1,18 +1,39 @@
 {
   "name": "Asuma Bot - Smart WhatsApp Automation",
   "short_name": "Asuma Bot",
-  "description": "Bot WhatsApp multifungsi dengan AI assistant, downloader media, manajemen grup, dan 100+ perintah.",
+  "description": "Asuma adalah bot WhatsApp multifungsi — AI assistant, manajemen grup, downloader media, RPG & games, dan lebih dari 100 perintah siap pakai.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "id": "/?source=pwa",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "fullscreen",
+    "browser"
+  ],
   "background_color": "#09090b",
   "theme_color": "#0f172a",
   "orientation": "any",
   "lang": "id",
   "dir": "ltr",
-  "categories": ["utilities", "productivity", "communication"],
+  "categories": ["utilities", "productivity", "communication", "social"],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["image/*", "video/*", "audio/*", "application/pdf", ".pdf"]
+        }
+      ]
+    }
+  },
   "icons": [
     {
       "src": "/icons/android-chrome-192x192.png",
@@ -31,13 +52,19 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "shortcuts": [
     {
       "name": "Buka Bot",
       "short_name": "Bot",
-      "description": "Buka Asuma Bot",
+      "description": "Buka Asuma Bot langsung",
       "url": "/?source=pwa",
       "icons": [
         {
@@ -50,7 +77,7 @@
     {
       "name": "Perintah Populer",
       "short_name": "Commands",
-      "description": "Lihat daftar perintah",
+      "description": "Lihat daftar perintah yang tersedia",
       "url": "/commands?source=pwa",
       "icons": [
         {
@@ -59,6 +86,20 @@
           "type": "image/png"
         }
       ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshots/screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
