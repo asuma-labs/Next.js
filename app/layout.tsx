@@ -1,5 +1,4 @@
-// app/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -14,14 +13,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0f172a" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://asuma.my.id"),
   title: {
     default: "Asuma Bot - Smart WhatsApp Automation",
     template: "%s | Asuma Bot",
   },
-  description:
-    "Asuma adalah bot WhatsApp multifungsi — AI assistant, manajemen grup, downloader media, RPG & games, dan lebih dari 100 perintah siap pakai.",
+  description: "Asuma adalah bot WhatsApp multifungsi — AI assistant, manajemen grup, downloader media, RPG & games, dan lebih dari 100 perintah siap pakai.",
   keywords: [
     "asuma bot",
     "whatsapp bot",
@@ -40,8 +49,7 @@ export const metadata: Metadata = {
     url: "https://asuma.my.id",
     siteName: "Asuma Bot",
     title: "Asuma Bot - Smart WhatsApp Automation",
-    description:
-      "Bot WhatsApp multifungsi dengan AI assistant, downloader media, manajemen grup, dan 100+ perintah.",
+    description: "Bot WhatsApp multifungsi dengan AI assistant, downloader media, manajemen grup, dan 100+ perintah.",
     images: [
       {
         url: "/icons/android-chrome-512x512.png",
@@ -76,7 +84,12 @@ export const metadata: Metadata = {
       { rel: "android-chrome-512x512", url: "/icons/android-chrome-512x512.png" },
     ],
   },
-  manifest: "/site.webmanifest",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Asuma Bot",
+  },
   robots: {
     index: true,
     follow: true,
@@ -97,7 +110,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
         </ThemeProvider>
