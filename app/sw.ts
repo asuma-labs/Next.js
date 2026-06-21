@@ -102,6 +102,21 @@ const serwist = new Serwist({
         ],
       }),
     },
+    {
+      matcher: ({ url }) => url.pathname.startsWith('/icons/'),
+      handler: new CacheFirst({
+        cacheName: 'icons-cache',
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 50,
+            maxAgeSeconds: 60 * 60 * 24 * 30,
+          }),
+          new CacheableResponsePlugin({
+            statuses: [0, 200],
+          }),
+        ],
+      }),
+    },
     ...defaultCache,
   ],
   fallbacks: {
@@ -113,7 +128,7 @@ const serwist = new Serwist({
         },
       },
       {
-        url: '/offline-image.png',
+        url: '/icons/android-chrome-192x192.png',
         matcher({ request }) {
           return request.destination === 'image';
         },
@@ -130,8 +145,7 @@ self.addEventListener('activate', (event) => {
           .filter((name) => 
             !name.includes('asuma') && 
             !name.includes('serwist')
-          )
-          .map((name) => caches.delete(name))
+          )          .map((name) => caches.delete(name))
       );
     })
   );
@@ -142,10 +156,11 @@ self.addEventListener('push', (event) => {
     const data = event.data.json();
     self.registration.showNotification(data.title || 'Asuma Bot', {
       body: data.body || 'Ada notifikasi baru',
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
+      icon: '/icons/android-chrome-192x192.png',
+      badge: '/icons/android-chrome-192x192.png',
       data: data.data || {},
-    });  }
+    });
+  }
 });
 
 self.addEventListener('notificationclick', (event) => {
