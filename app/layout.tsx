@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script"; 
+import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0f172a" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
   ],
   width: "device-width",
@@ -78,7 +78,12 @@ export const metadata: Metadata = {
       { url: "/icons/favicon.svg", type: "image/svg+xml" },
     ],
     apple: [
-      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/icons/ios/apple-icon-180x180.png", sizes: "180x180", type: "image/png" },
+      { url: "/icons/ios/apple-icon-167x167.png", sizes: "167x167", type: "image/png" },
+      { url: "/icons/ios/apple-icon-152x152.png", sizes: "152x152", type: "image/png" },
+      { url: "/icons/ios/apple-icon-120x120.png", sizes: "120x120", type: "image/png" },
+      { url: "/icons/ios/apple-icon-76x76.png", sizes: "76x76", type: "image/png" },
+      { url: "/icons/ios/apple-icon-60x60.png", sizes: "60x60", type: "image/png" },
     ],
     other: [
       { rel: "android-chrome-192x192", url: "/icons/android-chrome-192x192.png" },
@@ -115,20 +120,11 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
         </ThemeProvider>
-
-        {/* Script Registrasi Service Worker */}
         <Script id="sw-register" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(
-                  function(registration) {
-                    console.log('ServiceWorker berhasil didaftarkan dengan scope: ', registration.scope);
-                  },
-                  function(err) {
-                    console.log('ServiceWorker gagal didaftarkan: ', err);
-                  }
-                );
+                navigator.serviceWorker.register('/sw.js');
               });
             }
           `}
