@@ -78,12 +78,12 @@ export const metadata: Metadata = {
       { url: "/icons/favicon.svg", type: "image/svg+xml" },
     ],
     apple: [
-      { url: "/icons/ios/apple-icon-180x180.png", sizes: "180x180", type: "image/png" },
-      { url: "/icons/ios/apple-icon-167x167.png", sizes: "167x167", type: "image/png" },
-      { url: "/icons/ios/apple-icon-152x152.png", sizes: "152x152", type: "image/png" },
-      { url: "/icons/ios/apple-icon-120x120.png", sizes: "120x120", type: "image/png" },
-      { url: "/icons/ios/apple-icon-76x76.png", sizes: "76x76", type: "image/png" },
-      { url: "/icons/ios/apple-icon-60x60.png", sizes: "60x60", type: "image/png" },
+      { url: "/icons/ios/180.png", sizes: "180x180", type: "image/png" },
+      { url: "/icons/ios/167.png", sizes: "167x167", type: "image/png" },
+      { url: "/icons/ios/152.png", sizes: "152x152", type: "image/png" },
+      { url: "/icons/ios/120.png", sizes: "120x120", type: "image/png" },
+      { url: "/icons/ios/76.png", sizes: "76x76", type: "image/png" },
+      { url: "/icons/ios/60.png", sizes: "60x60", type: "image/png" },
     ],
     other: [
       { rel: "android-chrome-192x192", url: "/icons/android-chrome-192x192.png" },
