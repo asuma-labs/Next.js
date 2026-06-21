@@ -1,3 +1,5 @@
+/// <reference lib="webworker" />
+
 import { defaultCache } from '@serwist/next/worker';
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
 import { Serwist } from 'serwist';
@@ -45,9 +47,9 @@ const serwist = new Serwist({
     {
       urlPattern: /^https:\/\/cdn\.asuma\.my\.id\/.*$/i,
       handler: 'CacheFirst',
-      options: {
-        cacheName: 'cdn-assets',
-        expiration: {          maxEntries: 200,
+      options: {        cacheName: 'cdn-assets',
+        expiration: {
+          maxEntries: 200,
           maxAgeSeconds: 60 * 60 * 24 * 7,
         },
         cacheableResponse: { statuses: [0, 200] },
@@ -94,9 +96,9 @@ const serwist = new Serwist({
       {
         url: '/offline-image.png',
         matcher({ request }) {
-          return request.destination === 'image';
-        },
-      },    ],
+          return request.destination === 'image';        },
+      },
+    ],
   },
 });
 
