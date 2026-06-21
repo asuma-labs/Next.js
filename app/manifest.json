@@ -102,6 +102,7 @@
         {
           "src": "/screenshots/mobile.png",
           "sizes": "1080x2340",
+          "type": "image/png",
           "label": "Tampilan Widget Asuma Status"
         }
       ],
@@ -122,11 +123,9 @@
   },
   "scope_extensions": [
     {
-      "type": "origin",
       "origin": "https://asuma.my.id"
     },
     {
-      "type": "origin",
       "origin": "https://*.asuma.my.id"
     }
   ],
