@@ -1,0 +1,55 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Asuma Bot Status",
+      "weight": "Bolder",
+      "size": "Medium",
+      "horizontalAlignment": "Center",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "✅ **Online**",
+      "weight": "Bolder",
+      "size": "Large",
+      "color": "Good",
+      "horizontalAlignment": "Center",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "${status_message}",
+      "wrap": true,
+      "isSubtle": true,
+      "horizontalAlignment": "Center"
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Total Perintah:",
+          "value": "${total_commands}"
+        },
+        {
+          "title": "Users Aktif:",
+          "value": "${active_users}"
+        },
+        {
+          "title": "Last Update:",
+          "value": "${last_updated}"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "Buka Asuma Bot",
+      "url": "https://asuma.my.id/?source=widget"
+    }
+  ]
+}
