@@ -2,7 +2,14 @@
 
 import { defaultCache } from '@serwist/next/worker';
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
-import { Serwist } from 'serwist';
+import { 
+  CacheFirst, 
+  NetworkFirst, 
+  StaleWhileRevalidate, 
+  ExpirationPlugin, 
+  CacheableResponsePlugin,
+  Serwist 
+} from 'serwist';
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -20,68 +27,80 @@ const serwist = new Serwist({
   disableDevLogs: true,
   runtimeCaching: [
     {
-      urlPattern: /^https:\/\/bot\.asuma\.my\.id\/api\/(?:chat|command)\/.*$/i,
-      handler: 'NetworkFirst',
-      options: {
+      matcher: ({ url }) => /^https:\/\/bot\.asuma\.my\.id\/api\/(?:chat|command)\/.*$/i.test(url.href),
+      handler: new NetworkFirst({
         cacheName: 'api-dynamic-cache',
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 60 * 30,
-        },
         networkTimeoutSeconds: 5,
-        cacheableResponse: { statuses: [0, 200] },
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 50,
+            maxAgeSeconds: 60 * 30,
+          }),
+          new CacheableResponsePlugin({
+            statuses: [0, 200],
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: /^https:\/\/bot\.asuma\.my\.id\/api\/(?:stats|info)\/.*$/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
+      matcher: ({ url }) => /^https:\/\/bot\.asuma\.my\.id\/api\/(?:stats|info)\/.*$/i.test(url.href),
+      handler: new StaleWhileRevalidate({
         cacheName: 'api-static-cache',
-        expiration: {
-          maxEntries: 30,
-          maxAgeSeconds: 60 * 60 * 6,
-        },
-        cacheableResponse: { statuses: [0, 200, 404] },
-      },
+        plugins: [
+          new ExpirationPlugin({            maxEntries: 30,
+            maxAgeSeconds: 60 * 60 * 6,
+          }),
+          new CacheableResponsePlugin({
+            statuses: [0, 200, 404],
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: /^https:\/\/cdn\.asuma\.my\.id\/.*$/i,
-      handler: 'CacheFirst',
-      options: {        cacheName: 'cdn-assets',
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 60 * 60 * 24 * 7,
-        },
-        cacheableResponse: { statuses: [0, 200] },
-      },
+      matcher: ({ url }) => /^https:\/\/cdn\.asuma\.my\.id\/.*$/i.test(url.href),
+      handler: new CacheFirst({
+        cacheName: 'cdn-assets',
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 200,
+            maxAgeSeconds: 60 * 60 * 24 * 7,
+          }),
+          new CacheableResponsePlugin({
+            statuses: [0, 200],
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: ({ request }) => 
+      matcher: ({ request }) => 
         request.destination === 'image' && 
         !request.url.includes('cdn.asuma.my.id'),
-      handler: 'StaleWhileRevalidate',
-      options: {
+      handler: new StaleWhileRevalidate({
         cacheName: 'images-cache',
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 60 * 60 * 24 * 3,
-        },
-        cacheableResponse: { statuses: [0, 200] },
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 100,
+            maxAgeSeconds: 60 * 60 * 24 * 3,
+          }),
+          new CacheableResponsePlugin({
+            statuses: [0, 200],
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: ({ request }) => 
+      matcher: ({ request }) => 
         request.destination === 'style' || 
         request.destination === 'script' ||
         request.destination === 'font',
-      handler: 'StaleWhileRevalidate',
-      options: {
+      handler: new StaleWhileRevalidate({
         cacheName: 'static-assets',
-        expiration: {
-          maxEntries: 60,
-          maxAgeSeconds: 60 * 60 * 24 * 30,
-        },
-      },
+        plugins: [
+          new ExpirationPlugin({            maxEntries: 60,
+            maxAgeSeconds: 60 * 60 * 24 * 30,
+          }),
+        ],
+      }),
     },
     ...defaultCache,
   ],
@@ -96,7 +115,8 @@ const serwist = new Serwist({
       {
         url: '/offline-image.png',
         matcher({ request }) {
-          return request.destination === 'image';        },
+          return request.destination === 'image';
+        },
       },
     ],
   },
@@ -125,8 +145,7 @@ self.addEventListener('push', (event) => {
       icon: '/icon-192.png',
       badge: '/icon-192.png',
       data: data.data || {},
-    });
-  }
+    });  }
 });
 
 self.addEventListener('notificationclick', (event) => {
