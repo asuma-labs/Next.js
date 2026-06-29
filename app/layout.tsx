@@ -71,12 +71,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/icons/favicon-96x96.png", sizes: "96x96", type: "image/png" },
-      { url: "/icons/favicon.ico", sizes: "any" },
       { url: "/icons/favicon.svg", type: "image/svg+xml" },
     ],
+    shortcut: "/favicon.ico",
     apple: [
       { url: "/icons/ios/180.png", sizes: "180x180", type: "image/png" },
       { url: "/icons/ios/167.png", sizes: "167x167", type: "image/png" },
