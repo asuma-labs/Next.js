@@ -8,7 +8,7 @@ async function handleProxy(request: NextRequest, { params }: { params: Promise<{
   const relativePath = '/' + path.join('/');
   
   const searchParams = request.nextUrl.search;
-  const targetUrl = `${API_URL}${relativePath}${searchParams}`;
+  const targetUrl = `https://db.asuma.my.id${relativePath}${searchParams}`;
 
   try {
     const headers = new Headers();
