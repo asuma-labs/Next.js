@@ -29,15 +29,21 @@ export default function LoginPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone, password }),
         });
+        
         const contentType = res.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
             throw new Error(`Server returned unexpected response (Status: ${res.status}). Please try again later.`);
         }
+        
         const data = await res.json();
         if (!data.success) throw new Error(data.error || data.message || 'Login failed');
+        
         const token = data.token || (data.data && data.data.token);
+        if (!token) throw new Error('Authentication token not received from server.');
+        
         setToken(token);
         router.push('/dashboard');
+        
       } else {
         if (!otpSent) {
           const res = await fetch('/api/auth/request-otp', {
@@ -45,28 +51,37 @@ export default function LoginPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone }),
           });
+          
           const contentType = res.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) {
               throw new Error(`Server returned unexpected response (Status: ${res.status}). Please try again later.`);
           }
+          
           const data = await res.json();
           if (!data.success) throw new Error(data.error || data.message || 'Failed to send OTP');
+          
           setOtpSent(true);
           setIsLoading(false);
           return;
+          
         } else {
           const res = await fetch('/api/auth/verify-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone, otp }),
           });
+          
           const contentType = res.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) {
               throw new Error(`Server returned unexpected response (Status: ${res.status}). Please try again later.`);
           }
+          
           const data = await res.json();
           if (!data.success) throw new Error(data.error || data.message || 'Invalid OTP');
+          
           const token = data.token || (data.data && data.data.token);
+          if (!token) throw new Error('Authentication token not received from server.');
+
           setToken(token);
           router.push('/dashboard');
         }
@@ -79,8 +94,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-200/40 via-white to-white dark:from-white/5 dark:via-zinc-950 dark:to-zinc-950 -z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-200/40 via-white to-white dark:from-white/5 dark:via-zinc-950 dark:to-zinc-950 -z-10" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -102,7 +116,6 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xl shadow-zinc-900/5 dark:shadow-black/20">
-          {/* Toggle Method */}
           <div className="flex p-1 bg-zinc-100 dark:bg-zinc-950 rounded-xl mb-6 relative">
             <button onClick={() => { setMethod('password'); setOtpSent(false); setError(''); }}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all relative z-10 ${method === 'password' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}>
@@ -112,7 +125,6 @@ export default function LoginPage() {
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all relative z-10 ${method === 'otp' ? 'text-zinc-900 dark:text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'}`}>
               <Smartphone className="w-4 h-4" /> OTP
             </button>
-             {/* Slider Background */}
              <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-300 ease-out ${method === 'password' ? 'left-1' : 'left-[calc(50%+2px)]'}`} />
           </div>
 
