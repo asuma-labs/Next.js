@@ -8,8 +8,10 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/api/",
         "/dashboard/",
+        "/_next/",
       ],
     },
-    sitemap: "https://asuma.my.id/sitemap.xml",
+    sitemap: "https://www.asuma.my.id/sitemap.xml",
+    host: "https://www.asuma.my.id",
   };
 }
