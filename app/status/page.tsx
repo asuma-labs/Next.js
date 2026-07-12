@@ -1,4 +1,3 @@
-// app/status/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,15 +8,12 @@ import {
   XCircle, 
   AlertCircle, 
   Clock, 
-  Zap, 
   Server,
   Wifi,
   Database,
   RefreshCw,
   ArrowLeft,
-  HardDrive,
-  Cpu,
-  Activity
+  HardDrive
 } from 'lucide-react';
 
 interface StatusData {
@@ -66,20 +62,26 @@ export default function StatusPage() {
   const [statusData, setStatusData] = useState<StatusData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDown, setIsDown] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchStatus = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch('https://db.asuma.my.id/api/status');
-      if (!res.ok) throw new Error('Failed to fetch status');
+      const res = await fetch('https://db.asuma.my.id/api/status', {
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
       const data = await res.json();
       setStatusData(data);
       setLastUpdated(new Date());
       setError(null);
+      setIsDown(false);
     } catch (err) {
+      setIsDown(true);
       setError(err instanceof Error ? err.message : 'Unknown error');
+      setLastUpdated(new Date());
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -88,7 +90,7 @@ export default function StatusPage() {
 
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 60000); // Auto refresh tiap 60 detik
+    const interval = setInterval(fetchStatus, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -140,16 +142,50 @@ export default function StatusPage() {
     );
   }
 
-  if (error || !statusData) {
+  if (isDown || !statusData) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-zinc-50 via-slate-100 to-indigo-50/50 dark:from-[#060D1F] dark:via-[#0A1628] dark:to-[#0D1B2E] p-6">
-        <p className="text-red-500 font-medium">{error || 'Failed to load status'}</p>
-        <button 
-          onClick={fetchStatus}
-          className="px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-medium rounded-xl"
-        >
-          Retry
-        </button>
+      <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-slate-100 to-indigo-50/50 dark:from-[#060D1F] dark:via-[#0A1628] dark:to-[#0D1B2E] text-zinc-900 dark:text-white p-6 pt-24 flex flex-col items-center">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-red-500/10 blur-3xl opacity-75 dark:opacity-100" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-64 rounded-full bg-red-500/10 blur-3xl opacity-75 dark:opacity-100" />
+        </div>
+
+        <div className="w-full max-w-2xl mx-auto relative z-10 flex flex-col items-center text-center gap-6">
+          <Link href="/" className="self-start inline-flex items-center text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors font-medium">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
+          </Link>
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium">
+            <XCircle className="w-4 h-4" />
+            Service Outage
+          </div>
+
+          <h1 className="text-4xl font-extrabold tracking-tight">API Server Down</h1>
+
+          <p className="text-zinc-600 dark:text-zinc-400 max-w-md leading-relaxed">
+            Gagal terhubung ke <span className="font-mono">db.asuma.my.id</span>. Server mungkin lagi down, restart, atau tidak bisa dijangkau.
+          </p>
+
+          {error && (
+            <p className="text-xs font-mono text-red-500 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg max-w-md break-all">
+              {error}
+            </p>
+          )}
+
+          <button
+            onClick={fetchStatus}
+            disabled={isRefreshing}
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-medium rounded-xl disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Checking...' : 'Retry'}
+          </button>
+
+          <p className="text-xs text-zinc-400 dark:text-zinc-500">
+            Last attempt: {lastUpdated.toLocaleString('id-ID')} · Auto-retry every 60 seconds
+          </p>
+        </div>
       </div>
     );
   }
@@ -158,14 +194,12 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-slate-100 to-indigo-50/50 dark:from-[#060D1F] dark:via-[#0A1628] dark:to-[#0D1B2E] text-zinc-900 dark:text-white transition-colors duration-300 p-6 pt-24 pb-24 relative overflow-hidden">
-      {/* Background Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl opacity-75 dark:opacity-100" />
         <div className="absolute bottom-0 right-1/4 w-96 h-64 rounded-full bg-indigo-500/10 blur-3xl opacity-75 dark:opacity-100" />
       </div>
 
       <div className="w-full max-w-4xl mx-auto relative z-10">
-        {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -15 }}
           animate={{ opacity: 1, x: 0 }}
@@ -177,7 +211,6 @@ export default function StatusPage() {
           </Link>
         </motion.div>
 
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -203,7 +236,6 @@ export default function StatusPage() {
           </p>
         </motion.div>
 
-        {/* Last Updated & Refresh */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -224,7 +256,6 @@ export default function StatusPage() {
           </button>
         </motion.div>
 
-        {/* Summary Stats */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -245,7 +276,6 @@ export default function StatusPage() {
           </div>
         </motion.div>
 
-        {/* System Resources */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -276,7 +306,6 @@ export default function StatusPage() {
           </div>
         </motion.div>
 
-        {/* Endpoints */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -306,7 +335,6 @@ export default function StatusPage() {
           </div>
         </motion.div>
 
-        {/* SQLite & JSON */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -361,7 +389,6 @@ export default function StatusPage() {
           </motion.div>
         </div>
 
-        {/* Footer Info */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
