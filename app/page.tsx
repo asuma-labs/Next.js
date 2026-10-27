@@ -6,62 +6,60 @@ import Link from 'next/link';
 import {
   Bot, Users, Gamepad2, Download, Search, Zap,
   ArrowRight, CheckCircle2, Code2, Shield,
-  Heart, BookOpen, Mail, Home as HomeIcon,
+  Heart, BookOpen, Home as HomeIcon,
   UserCheck, Clock, TrendingUp, Menu, X, Send
 } from 'lucide-react';
 
 const TestimonialSection = lazy(() => import('../components/TestimonialSection'));
 
 // ==========================================
-// KOMPONEN NAVBAR (Neumorphism)
+// KOMPONEN NAVBAR (Clean & Flat)
 // ==========================================
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#E2E8F0] shadow-[0_4px_10px_rgba(163,177,198,0.3)]">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            {/* Logo dengan efek timbul */}
-            <div className="w-10 h-10 rounded-xl bg-[#E2E8F0] shadow-[4px_4px_8px_#c5d0e0,-4px_-4px_8px_#ffffff] flex items-center justify-center group-hover:shadow-[inset_4px_4px_8px_#c5d0e0,inset_-4px_-4px_8px_#ffffff] transition-all">
-              <Bot className="w-5 h-5 text-blue-600" />
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+              <Bot className="w-5 h-5 text-white" />
             </div>
-            <span className="font-extrabold text-xl text-slate-800 tracking-tight">Asuma</span>
+            <span className="font-bold text-xl text-slate-900 tracking-tight">Asuma</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">
+            <Link href="/" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
               Home
             </Link>
-            <Link href="/about" className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">
+            <Link href="/about" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
               About
             </Link>
-            <Link href="/docs" className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">
+            <Link href="/docs" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
               Documentation
             </Link>
-            {/* Tombol Neumorphism */}
-            <button className="h-10 px-6 rounded-xl bg-[#E2E8F0] text-blue-600 font-bold shadow-[4px_4px_8px_#c5d0e0,-4px_-4px_8px_#ffffff] hover:shadow-[inset_4px_4px_8px_#c5d0e0,inset_-4px_-4px_8px_#ffffff] active:shadow-[inset_4px_4px_8px_#c5d0e0,inset_-4px_-4px_8px_#ffffff] transition-all">
+            <button className="h-9 px-5 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm">
               Coba Sekarang
             </button>
           </div>
 
           <button 
-            className="md:hidden p-2 rounded-lg text-slate-600"
+            className="md:hidden p-2 text-slate-600"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </nav>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed top-20 left-0 right-0 z-40 bg-[#E2E8F0] shadow-lg p-6 space-y-4 md:hidden border-t border-slate-300">
-          <Link href="/" className="block text-sm font-bold text-slate-700">Home</Link>
-          <Link href="/about" className="block text-sm font-bold text-slate-700">About</Link>
-          <Link href="/docs" className="block text-sm font-bold text-slate-700">Documentation</Link>
-          <button className="w-full h-10 mt-2 rounded-xl bg-[#E2E8F0] text-blue-600 font-bold shadow-[4px_4px_8px_#c5d0e0,-4px_-4px_8px_#ffffff]">
+        <div className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-slate-200 p-6 space-y-4 md:hidden shadow-lg">
+          <Link href="/" className="block text-sm font-medium text-slate-700">Home</Link>
+          <Link href="/about" className="block text-sm font-medium text-slate-700">About</Link>
+          <Link href="/docs" className="block text-sm font-medium text-slate-700">Documentation</Link>
+          <button className="w-full h-10 mt-2 rounded-md bg-blue-600 text-white text-sm font-semibold">
             Coba Sekarang
           </button>
         </div>
@@ -100,7 +98,7 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
 }
 
 // ==========================================
-// KOMPONEN MOCKUP WHATSAPP (Soft UI)
+// KOMPONEN MOCKUP WHATSAPP (Clean UI)
 // ==========================================
 function WhatsAppMockup() {
   const messages = [
@@ -121,30 +119,32 @@ function WhatsAppMockup() {
   }, []);
 
   return (
-    <div className="w-full max-w-sm mx-auto bg-[#E2E8F0] rounded-3xl shadow-[20px_20px_60px_#c5d0e0,-20px_-20px_60px_#ffffff] p-6">
+    <div className="w-full max-w-sm mx-auto bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
       {/* Header Chat */}
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-300/50">
-        <div className="w-10 h-10 rounded-full bg-[#E2E8F0] shadow-[inset_2px_2px_5px_#c5d0e0,inset_-2px_-2px_5px_#ffffff] flex items-center justify-center">
+      <div className="bg-slate-50 border-b border-slate-200 px-5 py-4 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
           <Bot className="w-5 h-5 text-blue-600" />
         </div>
         <div>
-          <p className="font-bold text-slate-800 text-sm">Asuma Bot</p>
-          <p className="text-xs text-green-500 font-medium">● Online</p>
+          <p className="font-bold text-slate-900 text-sm">Asuma Bot</p>
+          <p className="text-xs text-green-600 font-medium flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Online
+          </p>
         </div>
       </div>
       
       {/* Area Chat */}
-      <div className="space-y-4 min-h-[280px]">
+      <div className="p-5 space-y-4 min-h-[300px] bg-white">
         {messages.map((msg, index) => (
           visibleMessages.includes(index) && (
             <div
               key={index}
               className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm whitespace-pre-line ${
+              <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-line ${
                 msg.type === 'user'
-                  ? 'bg-[#E2E8F0] shadow-[inset_3px_3px_6px_#c5d0e0,inset_-3px_-3px_6px_#ffffff] text-blue-700 font-medium rounded-br-none'
-                  : 'bg-[#E2E8F0] shadow-[5px_5px_10px_#c5d0e0,-5px_-5px_10px_#ffffff] text-slate-700 rounded-bl-none'
+                  ? 'bg-blue-600 text-white rounded-br-sm'
+                  : 'bg-slate-100 text-slate-800 border border-slate-200 rounded-bl-sm'
               }`}>
                 {msg.text}
               </div>
@@ -154,12 +154,12 @@ function WhatsAppMockup() {
       </div>
 
       {/* Input Chat */}
-      <div className="mt-6 flex items-center gap-3">
-        <div className="flex-1 px-4 py-3 rounded-xl bg-[#E2E8F0] shadow-[inset_3px_3px_6px_#c5d0e0,inset_-3px_-3px_6px_#ffffff] text-sm text-slate-400">
+      <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center gap-3">
+        <div className="flex-1 px-4 py-2.5 rounded-md bg-white border border-slate-300 text-sm text-slate-400">
           Ketik pesan...
         </div>
-        <button className="w-12 h-12 rounded-xl bg-[#E2E8F0] shadow-[5px_5px_10px_#c5d0e0,-5px_-5px_10px_#ffffff] flex items-center justify-center text-blue-600 hover:shadow-[inset_3px_3px_6px_#c5d0e0,inset_-3px_-3px_6px_#ffffff] transition-all">
-          <Send className="w-5 h-5" />
+        <button className="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+          <Send className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -171,36 +171,36 @@ function WhatsAppMockup() {
 // ==========================================
 export default function Home() {
   return (
-    <div className="min-h-screen font-sans bg-[#E2E8F0] text-slate-800 transition-colors duration-300">
+    <div className="min-h-screen font-sans bg-slate-50 text-slate-800">
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-6">
 
         {/* HERO SECTION */}
-        <section className="pt-40 pb-24 md:pt-48 md:pb-32">
+        <section className="pt-32 pb-20 md:pt-40 md:pb-28">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#E2E8F0] shadow-[inset_3px_3px_6px_#c5d0e0,inset_-3px_-3px_6px_#ffffff] text-blue-600 text-xs font-bold mb-8">
-                <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold mb-8">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
                 WhatsApp Bot v2.0 Telah Hadir
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6 text-slate-900">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6 text-slate-900">
                 Otomatisasi WhatsApp <br className="hidden lg:block"/> 
                 <span className="text-blue-600">Lebih Cerdas.</span>
               </h1>
 
-              <p className="text-lg text-slate-600 mb-10 max-w-lg font-medium leading-relaxed">
+              <p className="text-lg text-slate-600 mb-8 max-w-lg leading-relaxed">
                 Satu bot untuk semua kebutuhan. AI Assistant, manajemen grup, downloader, dan mini-games. Cepat, stabil, dan mudah digunakan.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
-                <button className="h-14 px-8 rounded-2xl bg-[#E2E8F0] text-blue-600 font-bold shadow-[6px_6px_12px_#c5d0e0,-6px_-6px_12px_#ffffff] hover:shadow-[inset_6px_6px_12px_#c5d0e0,inset_-6px_-6px_12px_#ffffff] transition-all flex items-center justify-center gap-2 group">
-                  Mulai Sekarang <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <button className="h-12 px-6 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                  Mulai Sekarang <ArrowRight className="w-4 h-4" />
                 </button>
                 <Link
                   href="/docs"
-                  className="h-14 px-8 rounded-2xl bg-[#E2E8F0] text-slate-700 font-bold shadow-[6px_6px_12px_#c5d0e0,-6px_-6px_12px_#ffffff] hover:shadow-[inset_6px_6px_12px_#c5d0e0,inset_-6px_-6px_12px_#ffffff] transition-all flex items-center justify-center"
+                  className="h-12 px-6 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-colors flex items-center justify-center shadow-sm"
                 >
                   Lihat Dokumentasi
                 </Link>
@@ -213,34 +213,34 @@ export default function Home() {
           </div>
         </section>
 
-        {/* STATS SECTION */}
-        <section className="py-12 mb-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {/* STATS SECTION (Clean Grid) */}
+        <section className="py-12 border-y border-slate-200">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-slate-200">
             {[
-              { icon: <Code2 className="w-6 h-6" />, value: 100, suffix: "+", label: "Commands" },
-              { icon: <Clock className="w-6 h-6" />, value: 24, suffix: "/7", label: "Uptime" },
-              { icon: <UserCheck className="w-6 h-6" />, value: 1000, suffix: "+", label: "Pengguna" },
-              { icon: <TrendingUp className="w-6 h-6" />, value: 30, suffix: "+", label: "Update/Bulan" }
+              { icon: <Code2 className="w-5 h-5" />, value: 100, suffix: "+", label: "Commands" },
+              { icon: <Clock className="w-5 h-5" />, value: 24, suffix: "/7", label: "Uptime" },
+              { icon: <UserCheck className="w-5 h-5" />, value: 1000, suffix: "+", label: "Pengguna" },
+              { icon: <TrendingUp className="w-5 h-5" />, value: 30, suffix: "+", label: "Update/Bulan" }
             ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left gap-3 p-6 rounded-2xl bg-[#E2E8F0] shadow-[8px_8px_16px_#c5d0e0,-8px_-8px_16px_#ffffff]">
-                <div className="text-blue-600 mb-1">{stat.icon}</div>
-                <h4 className="text-3xl font-extrabold text-slate-800">
+              <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left px-4">
+                <div className="text-blue-600 mb-2">{stat.icon}</div>
+                <h4 className="text-3xl font-bold text-slate-900">
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                 </h4>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
+                <p className="text-sm font-medium text-slate-500 mt-1">{stat.label}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* FITUR SECTION */}
-        <section className="py-20">
-          <div className="mb-16 text-center lg:text-left">
-            <h2 className="text-3xl font-extrabold mb-4 text-slate-900">Fitur Utama</h2>
-            <p className="text-slate-600 max-w-2xl font-medium">Didesain untuk memudahkan pekerjaanmu. Tanpa ribet, langsung bisa dipakai di grup atau chat pribadi.</p>
+        {/* FITUR SECTION (Bento/Card Grid) */}
+        <section className="py-24">
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-3 text-slate-900 tracking-tight">Fitur Utama</h2>
+            <p className="text-slate-600 max-w-2xl">Didesain untuk memudahkan pekerjaanmu. Tanpa ribet, langsung bisa dipakai di grup atau chat pribadi.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { icon: <Bot />, title: "AI Assistant", desc: "Tanya apa saja, minta ringkasan, atau buat konten langsung dari WhatsApp." },
               { icon: <Users />, title: "Group Management", desc: "Atur anggota, filter link spam, dan otomatisasi tugas admin grup." },
@@ -249,36 +249,36 @@ export default function Home() {
               { icon: <Search />, title: "Search Info", desc: "Cari berita, cuaca, atau lirik lagu tanpa keluar dari aplikasi." },
               { icon: <Zap />, title: "Fast Response", desc: "Infrastruktur stabil dengan latensi rendah untuk respon instan." }
             ].map((fitur, i) => (
-              <div key={i} className="p-8 rounded-3xl bg-[#E2E8F0] shadow-[10px_10px_20px_#c5d0e0,-10px_-10px_20px_#ffffff] hover:shadow-[inset_8px_8px_16px_#c5d0e0,inset_-8px_-8px_16px_#ffffff] transition-all duration-300 group cursor-default">
-                <div className="w-14 h-14 rounded-2xl bg-[#E2E8F0] shadow-[4px_4px_8px_#c5d0e0,-4px_-4px_8px_#ffffff] flex items-center justify-center text-blue-600 mb-6 group-hover:shadow-[inset_3px_3px_6px_#c5d0e0,inset_-3px_-3px_6px_#ffffff] transition-all">
-                  {React.cloneElement(fitur.icon, { className: "w-6 h-6" })}
+              <div key={i} className="p-6 rounded-xl bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md transition-all duration-200 group">
+                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-5 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  {React.cloneElement(fitur.icon, { className: "w-5 h-5" })}
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-slate-800">{fitur.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed font-medium">{fitur.desc}</p>
+                <h3 className="text-lg font-bold mb-2 text-slate-900">{fitur.title}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{fitur.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* TESTIMONIALS */}
-        <Suspense fallback={<div className="py-20 text-center font-bold text-slate-500">Memuat ulasan...</div>}>
+        <Suspense fallback={<div className="py-20 text-center text-slate-500">Memuat ulasan...</div>}>
           <TestimonialSection />
         </Suspense>
 
-        {/* DEVELOPER SECTION */}
-        <section className="py-24 mt-10">
-          <div className="p-10 md:p-14 rounded-[2.5rem] bg-[#E2E8F0] shadow-[20px_20px_60px_#c5d0e0,-20px_-20px_60px_#ffffff] flex flex-col md:flex-row gap-12 items-center md:items-start">
-            <div className="w-28 h-28 rounded-3xl bg-[#E2E8F0] shadow-[inset_5px_5px_10px_#c5d0e0,inset_-5px_-5px_10px_#ffffff] flex items-center justify-center text-5xl font-extrabold text-blue-600 shrink-0">
+        {/* DEVELOPER SECTION (Clean Layout) */}
+        <section className="py-20 border-t border-slate-200">
+          <div className="flex flex-col md:flex-row gap-10 items-center md:items-start max-w-4xl mx-auto">
+            <div className="w-24 h-24 rounded-2xl bg-blue-600 flex items-center justify-center text-3xl font-bold text-white shrink-0 shadow-sm">
               D
             </div>
             <div className="text-center md:text-left">
-              <h2 className="text-3xl font-extrabold mb-4 text-slate-900">Dibuat oleh Ditss</h2>
-              <p className="text-slate-600 mb-8 max-w-2xl leading-relaxed font-medium">
-                Asuma dikembangkan secara mandiri oleh <strong className="text-slate-800">Aditia (Ditss)</strong>. Fokus pada pengembangan bot WhatsApp, API backend, dan aplikasi web modern. Tujuannya sederhana: membuat otomatisasi yang bermanfaat dan mudah digunakan.
+              <h2 className="text-2xl font-bold mb-3 text-slate-900">Dibuat oleh Ditss</h2>
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                Asuma dikembangkan secara mandiri oleh <strong className="text-slate-900">Aditia (Ditss)</strong>. Fokus pada pengembangan bot WhatsApp, API backend, dan aplikasi web modern. Tujuannya sederhana: membuat otomatisasi yang bermanfaat dan mudah digunakan.
               </p>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4">
+              <div className="flex flex-wrap justify-center md:justify-start gap-3">
                 {['WhatsApp Bot Dev', 'Backend & Node.js', 'Web Apps'].map((skill, i) => (
-                  <span key={i} className="flex items-center gap-2 text-sm font-bold text-slate-700 px-4 py-2 rounded-xl bg-[#E2E8F0] shadow-[3px_3px_6px_#c5d0e0,-3px_-3px_6px_#ffffff]">
+                  <span key={i} className="flex items-center gap-2 text-sm font-medium text-slate-700 px-3 py-1.5 rounded-md bg-slate-100 border border-slate-200">
                     <CheckCircle2 className="w-4 h-4 text-blue-600" /> {skill}
                   </span>
                 ))}
@@ -288,17 +288,17 @@ export default function Home() {
         </section>
 
         {/* CTA SECTION */}
-        <section className="py-20 mb-20">
-          <div className="rounded-[2.5rem] p-12 md:p-20 text-center bg-[#E2E8F0] shadow-[inset_10px_10px_20px_#c5d0e0,inset_-10px_-10px_20px_#ffffff]">
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-6 text-slate-900">Siap mencoba Asuma?</h2>
-            <p className="text-slate-600 font-medium mb-10 max-w-xl mx-auto text-lg">
+        <section className="py-20 mb-10">
+          <div className="rounded-2xl p-10 md:p-16 text-center bg-blue-600 shadow-sm relative overflow-hidden">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Siap mencoba Asuma?</h2>
+            <p className="text-blue-100 mb-8 max-w-xl mx-auto">
               Bergabung dengan 1.000+ pengguna lainnya. Nikmati pengalaman WhatsApp yang lebih praktis tanpa perlu install aplikasi tambahan.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-5">
-              <button className="h-14 px-10 rounded-2xl bg-[#E2E8F0] text-blue-600 font-bold shadow-[6px_6px_12px_#c5d0e0,-6px_-6px_12px_#ffffff] hover:shadow-[4px_4px_8px_#c5d0e0,-4px_-4px_8px_#ffffff] transition-all">
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <button className="h-12 px-8 rounded-lg bg-white text-blue-700 font-bold hover:bg-slate-50 transition-colors shadow-sm">
                 Mulai Gratis Sekarang
               </button>
-              <Link href="/docs" className="h-14 px-10 rounded-2xl bg-[#E2E8F0] text-slate-700 font-bold shadow-[6px_6px_12px_#c5d0e0,-6px_-6px_12px_#ffffff] hover:shadow-[4px_4px_8px_#c5d0e0,-4px_-4px_8px_#ffffff] transition-all flex items-center justify-center">
+              <Link href="/docs" className="h-12 px-8 rounded-lg bg-blue-700 text-white font-semibold hover:bg-blue-800 transition-colors flex items-center justify-center">
                 Baca Dokumentasi
               </Link>
             </div>
@@ -308,22 +308,22 @@ export default function Home() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-[#E2E8F0] shadow-[0_-4px_10px_rgba(163,177,198,0.3)] py-10">
+      <footer className="bg-white border-t border-slate-200 py-10">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-2">
               <Bot className="w-6 h-6 text-blue-600" />
-              <span className="font-extrabold text-xl text-slate-800">Asuma</span>
+              <span className="font-bold text-lg text-slate-900">Asuma</span>
             </div>
             
-            <div className="flex gap-8 text-sm font-bold text-slate-600">
+            <div className="flex gap-6 text-sm font-medium text-slate-600">
               <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
               <Link href="/about" className="hover:text-blue-600 transition-colors">About</Link>
               <Link href="/docs" className="hover:text-blue-600 transition-colors">Docs</Link>
               <a href="#" className="hover:text-blue-600 transition-colors">GitHub</a>
             </div>
 
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm text-slate-500">
               © {new Date().getFullYear()} Asuma. Dibuat dengan <Heart className="w-4 h-4 inline text-red-500" /> oleh Ditss.
             </p>
           </div>
