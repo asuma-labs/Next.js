@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+// import Script from "next/script"; <-- HAPUS ATAU KOMENTARI BARIS INI
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import StructuredData from "@/components/StructuredData";
@@ -123,15 +123,10 @@ export default function RootLayout({
           <StructuredData />
           {children}
         </ThemeProvider>
-        <Script id="sw-register" strategy="afterInteractive">
-          {`
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js');
-              });
-            }
-          `}
-        </Script>
+        
+        {/* --- BAGIAN INI SUDAH DIHAPUS --- */}
+        {/* Script registrasi service worker dihapus agar tidak error 404 */}
+        
       </body>
     </html>
   );
